@@ -2,10 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // import Layout from './Components/Layout';
-import Login from './pages/Login';
+import Signin from './pages/Signin';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import Tenants from './pages/Tenants';
+import Index from './pages/Index';
+import Signup from './pages/Signup';
 
 
 function App() {
@@ -14,8 +16,9 @@ function App() {
     <Router>
       {/* <Layout> */}
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Index />} />
+        <Route path="/signin" element={<Signin />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/tenants" element={<Tenants />} />

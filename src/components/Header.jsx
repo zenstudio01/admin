@@ -2,8 +2,8 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm">
       <div className="px-8 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-600">
-          Zen Studio
+        <h1 className="text-2xl font-bold text-green-600">
+          Unit
         </h1>
 
         <div className="flex items-center gap-4">
