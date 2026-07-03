@@ -40,11 +40,14 @@ export default function Signin() {
           body: JSON.stringify(formData),
         }
       );
+      if(response.status == 200){
 
-      const data = response.data;
+      const data = response;
+      console.log("Data" + data.refresh_token);
 
       // Store auth tokens and user data securely
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       Swal.fire({
@@ -56,6 +59,14 @@ export default function Signin() {
       });
 
       navigate("/dashboard");
+    }else{
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: "Invalid email or password",
+      });
+
+    }
     } catch (error) {
       Swal.fire({
         icon: "error",

@@ -1,194 +1,395 @@
+import React, { useState, useEffect } from "react";
+import { 
+  Users, 
+  Search, 
+  Plus, 
+  Phone, 
+  Building2, 
+  CreditCard, 
+  FileText, 
+  X, 
+  CheckCircle, 
+  AlertCircle, 
+  Send 
+} from "lucide-react";
 import Layout from "../layouts/Layout";
-import {
-  FaSearch,
-  FaPlus,
-  FaPhone,
-  FaEnvelope,
-  FaUserCircle,
-} from "react-icons/fa";
+import Swal from "sweetalert2";
 
 export default function Tenants() {
-  const tenants = [
-    {
-      id: 1,
-      name: "John Mwangi",
-      email: "john@gmail.com",
-      phone: "+254712345678",
-      property: "Green Park Apartments",
-      unit: "A-12",
-      rent: "KES 15,000",
-      status: "Paid",
-    },
-    {
-      id: 2,
-      name: "Mary Wanjiku",
-      email: "mary@gmail.com",
-      phone: "+254723456789",
-      property: "Sunrise Residency",
-      unit: "B-07",
-      rent: "KES 18,000",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      name: "David Kiptoo",
-      email: "david@gmail.com",
-      phone: "+254734567890",
-      property: "Royal Heights",
-      unit: "C-15",
-      rent: "KES 22,000",
-      status: "Paid",
-    },
-  ];
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+
+  const [newTenant, setNewTenant] = useState({
+    name: "",
+    email: "",
+    phone_number: "",
+    property_name: "",
+    unit_number: "",
+    rent_amount: "",
+  });
+
+  useEffect(() => {
+    fetchTenants();
+  }, []);
+
+  const fetchTenants = async () => {
+    try {
+      setLoading(true);
+      
+      // Mock Data reflecting the operational tenant structure for the Nairobi pilot
+      const fallbackTenants = [
+        { id: 1, name: "Alex Njuguna", email: "alex@example.com", phone_number: "+254712345678", property_name: "Kilimani Heights", unit_number: "A-12", rent_amount: "55,000", status: "Paid" },
+        { id: 2, name: "Celestine Kilonzo", email: "celestine@example.com", phone_number: "+254722987654", property_name: "The Westlands Hub", unit_number: "Suite 4B", rent_amount: "120,000", status: "Pending" },
+        { id: 3, name: "Ian Kariuki", email: "ian@example.com", phone_number: "+254733112233", property_name: "Kilimani Heights", unit_number: "B-07", rent_amount: "45,000", status: "Paid" },
+        { id: 4, name: "Jane Doe", email: "jane@example.com", phone_number: "+254700445566", property_name: "Ngong Road Arcade", unit_number: "G-02", rent_amount: "35,000", status: "Overdue" },
+      ];
+
+      // const response = await axios.get("http://localhost:8000/api/tenants/", {
+      //   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      // });
+      // setTenants(response.data);
+
+      setTenants(fallbackTenants);
+    } catch (error) {
+      console.error("Error loading tenants", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setNewTenant({ ...newTenant, [e.target.name]: e.target.value });
+  };
+
+  const handleAddTenant = (e) => {
+    e.preventDefault();
+    
+    const createdTenant = {
+      id: Date.now(),
+      ...newTenant,
+      status: "Pending"
+    };
+
+    setTenants([createdTenant, ...tenants]);
+    setIsModalOpen(false);
+    setNewTenant({ name: "", email: "", phone_number: "", property_name: "", unit_number: "", rent_amount: "" });
+
+    Swal.fire({
+      icon: "success",
+      title: "Tenant Onboarded",
+      text: "Tenant has been registered and assigned to their unit.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
+
+  // Trigger local M-Pesa STK push workflow logic
+  const triggerMpesaStkPush = async (tenant) => {
+    Swal.fire({
+      title: "Initiate Rent Collection",
+      text: `Send M-Pesa STK Push of KES ${tenant.rent_amount} to ${tenant.name} (${tenant.phone_number})?`,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#2E9D47",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Request Rent"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Sending STK Push...",
+          text: "Awaiting user confirmation on mobile device.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Simulate backend communication with the Daraja API implementation
+        setTimeout(() => {
+          Swal.fire({
+            icon: "success",
+            title: "STK Push Dispatched",
+            text: "Payment prompt successfully sent to the tenant's device.",
+            timer: 2500,
+            showConfirmButton: false
+          });
+        }, 2000);
+      }
+    });
+  };
+
+  const filteredTenants = tenants.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          t.property_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          t.unit_number.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesFilter = filterStatus === "All" || t.status === filterStatus;
+    
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+      <div className="min-h-screen bg-[#F4F1E6]/30 p-4 md:p-8 font-sans">
+        
+        {/* Module Header Elements */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Tenants
-            </h1>
-            <p className="text-gray-500">
-              Manage all tenants across your properties
-            </p>
+            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Tenant Directory</h1>
+            <p className="text-sm text-gray-500 mt-1">Monitor tenant records, active leases, and digital rent collection statuses.</p>
           </div>
-
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2">
-            <FaPlus />
-            Add Tenant
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm text-sm self-start sm:self-center"
+          >
+            <Plus size={18} />
+            <span>Onboard Tenant</span>
           </button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Total Tenants</h3>
-            <p className="text-3xl font-bold mt-2">132</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Paid</h3>
-            <p className="text-3xl font-bold text-green-600 mt-2">
-              120
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Pending</h3>
-            <p className="text-3xl font-bold text-orange-500 mt-2">
-              12
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Occupancy Rate</h3>
-            <p className="text-3xl font-bold text-blue-600 mt-2">
-              90%
-            </p>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="bg-white p-4 rounded-xl shadow-sm">
-          <div className="relative">
-            <FaSearch className="absolute left-4 top-4 text-gray-400" />
-
+        {/* Filters and Controls */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-col lg:flex-row gap-4 justify-between items-center">
+          <div className="relative w-full lg:max-w-md">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <Search size={18} />
+            </span>
             <input
               type="text"
-              placeholder="Search tenants..."
-              className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search by name, property, or unit..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm"
             />
           </div>
-        </div>
 
-        {/* Tenants Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-6 py-4">Tenant</th>
-                  <th className="text-left px-6 py-4">Property</th>
-                  <th className="text-left px-6 py-4">Unit</th>
-                  <th className="text-left px-6 py-4">Rent</th>
-                  <th className="text-left px-6 py-4">Status</th>
-                  <th className="text-left px-6 py-4">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {tenants.map((tenant) => (
-                  <tr
-                    key={tenant.id}
-                    className="border-b hover:bg-gray-50"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <FaUserCircle className="text-4xl text-gray-400" />
-
-                        <div>
-                          <h4 className="font-semibold">
-                            {tenant.name}
-                          </h4>
-
-                          <div className="text-sm text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <FaEnvelope size={12} />
-                              {tenant.email}
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <FaPhone size={12} />
-                              {tenant.phone}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      {tenant.property}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      {tenant.unit}
-                    </td>
-
-                    <td className="px-6 py-4 font-semibold">
-                      {tenant.rent}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          tenant.status === "Paid"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-orange-100 text-orange-700"
-                        }`}
-                      >
-                        {tenant.status}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <button className="bg-blue-100 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-200">
-                          View
-                        </button>
-
-                        <button className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
-                          Edit
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Segmented control filter badges */}
+          <div className="flex gap-2 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0">
+            {["All", "Paid", "Pending", "Overdue"].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  filterStatus === status
+                    ? "bg-[#0A4429] text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
         </div>
+
+        {/* Table/List Wrapper */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : filteredTenants.length === 0 ? (
+          <div className="bg-white text-center rounded-2xl p-12 border border-dashed border-gray-200 max-w-md mx-auto mt-10">
+            <Users size={48} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-[#0A4429]">No Tenants Tracked</h3>
+            <p className="text-sm text-gray-500 mt-1 px-4">No tenant structures match your criteria or are assigned currently.</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#0A4429]/5 text-[#0A4429] font-semibold text-xs uppercase tracking-wider border-b border-gray-100">
+                    <th className="p-4">Tenant Info</th>
+                    <th className="p-4">Placement Asset</th>
+                    <th className="p-4">Financial Commitment</th>
+                    <th className="p-4">Collection Health</th>
+                    <th className="p-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 text-sm">
+                  {filteredTenants.map((tenant) => (
+                    <tr key={tenant.id} className="hover:bg-gray-50/50 transition-colors">
+                      {/* Name and Basic Contact */}
+                      <td className="p-4">
+                        <div className="font-semibold text-gray-800">{tenant.name}</div>
+                        <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                          <Phone size={12} /> {tenant.phone_number}
+                        </div>
+                      </td>
+                      {/* Property Details */}
+                      <td className="p-4">
+                        <div className="text-gray-700 flex items-center gap-1.5 font-medium">
+                          <Building2 size={14} className="text-[#2E9D47]" />
+                          {tenant.property_name}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-0.5">Unit: <span className="font-semibold text-[#0A4429]">{tenant.unit_number}</span></div>
+                      </td>
+                      {/* Rent Details */}
+                      <td className="p-4">
+                        <div className="font-bold text-gray-800">KES {tenant.rent_amount}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">Per Month</div>
+                      </td>
+                      {/* Status Badges */}
+                      <td className="p-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          tenant.status === "Paid" ? "bg-green-50 text-green-700" :
+                          tenant.status === "Pending" ? "bg-amber-50 text-amber-700" :
+                          "bg-red-50 text-red-700"
+                        }`}>
+                          {tenant.status === "Paid" ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                          {tenant.status}
+                        </span>
+                      </td>
+                      {/* Direct action tools */}
+                      <td className="p-4 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button 
+                            onClick={() => triggerMpesaStkPush(tenant)}
+                            disabled={tenant.status === "Paid"}
+                            title="Trigger M-Pesa STK Push Request"
+                            className="flex items-center gap-1 bg-[#2E9D47] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#0A4429] transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                          >
+                            <Send size={12} />
+                            <span>Request Rent</span>
+                          </button>
+                          <button 
+                            title="View Active Digital Lease Details"
+                            className="p-1.5 text-gray-500 hover:text-[#0A4429] border border-gray-200 rounded-lg hover:bg-white transition"
+                          >
+                            <FileText size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Onboarding Sliding Form Drawer */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-xs">
+            <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+              
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#0A4429] text-white">
+                <div>
+                  <h3 className="text-lg font-bold">Onboard Lease Tenant</h3>
+                  <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Bind users to explicit unit mappings.</p>
+                </div>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition text-white"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddTenant} className="p-6 flex-1 overflow-y-auto space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Legal Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={newTenant.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g. John Doe"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={newTenant.email}
+                    onChange={handleInputChange}
+                    placeholder="john@example.com"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Phone Number (M-Pesa Connected)</label>
+                  <input
+                    type="tel"
+                    name="phone_number"
+                    required
+                    value={newTenant.phone_number}
+                    onChange={handleInputChange}
+                    placeholder="e.g. +254712345678"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Target Property</label>
+                    <input
+                      type="text"
+                      name="property_name"
+                      required
+                      value={newTenant.property_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Kilimani Heights"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Unit Assignment</label>
+                    <input
+                      type="text"
+                      name="unit_number"
+                      required
+                      value={newTenant.unit_number}
+                      onChange={handleInputChange}
+                      placeholder="e.g. A-12"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Monthly Rent Cost (KES)</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs font-semibold">KES</span>
+                    <input
+                      type="number"
+                      name="rent_amount"
+                      required
+                      value={newTenant.rent_amount}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 55000"
+                      className="w-full pl-12 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#2E9D47] hover:bg-[#0A4429] text-white font-medium py-2.5 rounded-xl text-sm"
+                  >
+                    Onboard Lease
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </Layout>
   );

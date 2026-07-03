@@ -9,28 +9,31 @@ import {
   Users, 
   Eye, 
   EyeOff, 
-  ArrowRight 
+  ArrowRight,
+  Truck 
 } from 'lucide-react';
 import { API_URL } from '../config/env';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    full_name: '',
     email: '',
     phone_number: '',
     password: '',
-    role: 'PM', // Defaulting to Property Manager
+    confirmPassword: '', // Added tracking vector to state core
+    role: 'PM', 
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle state for the secondary input
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // Extracted user roles from your Django model
+  // Swapped out TENANT variant for Equipment Supplier architecture mapping
   const roles = [
     { value: 'PM', label: 'Property Manager', icon: Building2 },
     { value: 'LANDLORD', label: 'Landlord', icon: Users },
-    { value: 'TENANT', label: 'Tenant', icon: User },
+    { value: 'SUPPLIER', label: 'Equipment Supplier', icon: Truck },
     { value: 'PROVIDER', label: 'Service Provider / Fundi', icon: Briefcase },
   ];
 
@@ -44,20 +47,32 @@ const Signup = () => {
     setIsLoading(true);
     setMessage({ type: '', text: '' });
 
+    // Validation guard statement to confirm string equivalence before transmission
+    if (formData.password !== formData.confirmPassword) {
+      setMessage({ type: 'error', text: 'Passwords do not match. Please verify your entries.' });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/signup/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          full_name: formData.full_name,
+          email: formData.email,
+          phone_number: formData.phone_number,
+          password: formData.password,
+          role: formData.role,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Account created successfully! Redirecting to login...' });
-        // Clear form or handle navigation here
       } else {
         setMessage({ type: 'error', text: data.message || 'Registration failed. Please check your details.' });
       }
@@ -80,7 +95,6 @@ const Signup = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#2E9D47]/10 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
           
           <div className="z-10">
-            {/* Minimalist representation of the logo */}
             <div className="flex items-center gap-2 mb-6">
               <div className="w-10 h-10 border-2 border-[#2E9D47] rounded-lg flex items-center justify-center font-bold text-xl text-[#2E9D47]">
                 U
@@ -197,7 +211,7 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Password Input */}
+            {/* Primary Password Input */}
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-700 block">Password</label>
               <div className="relative">
@@ -211,7 +225,7 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
                 />
                 <button
                   type="button"
@@ -219,6 +233,32 @@ const Signup = () => {
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Explicit Confirm Password Element Injected Here */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-700 block">Confirm Password</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <Lock size={16} />
+                </span>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -236,7 +276,7 @@ const Signup = () => {
             <div className="text-center mt-4 pt-2 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 Already have an account?{' '}
-                <a href="/login" className="text-[#2E9D47] hover:text-[#0A4429] font-semibold transition-colors">
+                <a href="/signin" className="text-[#2E9D47] hover:text-[#0A4429] font-semibold transition-colors">
                   Sign In
                 </a>
               </p>

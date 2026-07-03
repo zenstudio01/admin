@@ -31,15 +31,45 @@ export default function Sidebar() {
       icon: <FaUsers />,
     },
     {
+      name: "Landlords",
+      path: "/landlords",
+      icon: <FaUsers />,
+    },
+    {
       name: "Maintenance",
       path: "/maintenance",
       icon: <FaTools />,
     },
     {
-      name: "Workers",
-      path: "/workers",
+      name: "Finances",
+      path: "/finances",
       icon: <FaClipboardList />,
     },
+    {
+      name: "Professional Services",
+      path: "/professional-services",
+      icon: <FaTools />,
+    },
+    {
+      name: "Compliance",
+      path: "/compliance",
+      icon: <FaTools />,
+    },
+    {
+      name: "Maintenance Store",
+      path: "/maintenance-store",
+      icon: <FaTools />,
+    },
+    {
+      name: "Admin Settings",
+      path: "/admin-settings",
+      icon: <FaTools />,
+    },
+    {
+      name: "Subscription Packages",
+      path: "/subscription-packages",
+      icon: <FaTools />,
+    }
   ];
 
   const handleLogout = () => {

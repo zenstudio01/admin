@@ -1,155 +1,344 @@
-import { FaPlus, FaSearch, FaBuilding, FaMapMarkerAlt } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { 
+  Building2, 
+  MapPin, 
+  Grid, 
+  Plus, 
+  Users, 
+  Search, 
+  DollarSign, 
+  X, 
+  SlidersHorizontal,
+  ChevronRight
+} from "lucide-react";
 import Layout from "../layouts/Layout";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 export default function Properties() {
-  const properties = [
-    {
-      id: 1,
-      name: "Green Park Apartments",
-      location: "Nairobi",
-      units: 50,
-      occupied: 45,
-      vacant: 5,
-      revenue: "KES 450,000",
-    },
-    {
-      id: 2,
-      name: "Sunrise Residency",
-      location: "Meru",
-      units: 30,
-      occupied: 25,
-      vacant: 5,
-      revenue: "KES 300,000",
-    },
-    {
-      id: 3,
-      name: "Royal Heights",
-      location: "Nakuru",
-      units: 40,
-      occupied: 38,
-      vacant: 2,
-      revenue: "KES 520,000",
-    },
-  ];
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const [newProperty, setNewProperty] = useState({
+    name: "",
+    location: "",
+    total_units: "",
+    property_type: "Residential",
+    description: "",
+  });
+
+  // Fetch properties from Django backend
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      
+      // Mock Data reflecting the Nairobi pilot profile for local testing if API isn't fully migrated
+      const fallbackData = [
+        { id: 1, name: "Kilimani Heights", location: "Kilimani, Nairobi", total_units: 45, occupied_units: 41, property_type: "Residential", monthly_rent: "KES 2.4M" },
+        { id: 2, name: "The Westlands Hub", location: "Westlands, Nairobi", total_units: 20, occupied_units: 18, property_type: "Commercial", monthly_rent: "KES 4.1M" },
+        { id: 3, name: "Ngong Road Arcade", location: "Ngong Road, Nairobi", total_units: 15, occupied_units: 12, property_type: "Mixed Use", monthly_rent: "KES 1.1M" },
+      ];
+
+      // Replace with your real backend endpoint when ready
+      // const response = await axios.get("http://localhost:8000/api/properties/", {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      // setProperties(response.data);
+
+      setProperties(fallbackData);
+    } catch (error) {
+      console.error("Error fetching portfolios", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setNewProperty({ ...newProperty, [e.target.name]: e.target.value });
+  };
+
+  const handleAddProperty = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      
+      // Opting for optimistic UI updates for mock tracking, replace with actual POST when backend is configured
+      // await axios.post("http://localhost:8000/api/properties/", newProperty, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+
+      const createdAsset = {
+        id: Date.now(),
+        ...newProperty,
+        total_units: parseInt(newProperty.total_units) || 0,
+        occupied_units: 0,
+        monthly_rent: "KES 0"
+      };
+
+      setProperties([createdAsset, ...properties]);
+      setIsModalOpen(false);
+      setNewProperty({ name: "", location: "", total_units: "", property_type: "Residential", description: "" });
+
+      Swal.fire({
+        icon: "success",
+        title: "Asset Registered",
+        text: "The new property has been successfully onboarded to your portfolio.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Setup Failed",
+        text: error.response?.data?.message || "Something went wrong onboarding this property.",
+      });
+    }
+  };
+
+  const filteredProperties = properties.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+      <div className="min-h-screen bg-[#F4F1E6]/30 p-4 md:p-8 font-sans">
+        
+        {/* Module Header Elements */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Properties
-            </h1>
-            <p className="text-gray-500">
-              Manage all your properties in one place
-            </p>
+            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Property Portfolio</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage physical real estate assets, tracking configurations, and tenants.</p>
           </div>
-
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2">
-            <FaPlus />
-            Add Property
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm shadow-[#2E9D47]/10 text-sm self-start sm:self-center"
+          >
+            <Plus size={18} />
+            <span>Onboard Property</span>
           </button>
         </div>
 
-        {/* Search */}
-        <div className="bg-white p-4 rounded-xl shadow-sm">
-          <div className="relative">
-            <FaSearch className="absolute left-4 top-4 text-gray-400" />
-
+        {/* Global Portfolio Search & Filter Section */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:max-w-md">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <Search size={18} />
+            </span>
             <input
               type="text"
-              placeholder="Search property..."
-              className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search assets by name or location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm"
             />
           </div>
+          <button className="flex items-center gap-2 px-4 py-2 text-sm text-[#0A4429] border border-gray-200 rounded-lg hover:bg-gray-50 transition w-full md:w-auto justify-center">
+            <SlidersHorizontal size={16} />
+            <span>Advanced Filters</span>
+          </button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Total Properties</h3>
-            <p className="text-3xl font-bold mt-2">12</p>
+        {/* Portfolios Inventory View */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
           </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Total Units</h3>
-            <p className="text-3xl font-bold mt-2">120</p>
+        ) : filteredProperties.length === 0 ? (
+          <div className="bg-white text-center rounded-2xl p-12 border border-dashed border-gray-200 max-w-md mx-auto mt-10">
+            <Building2 size={48} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-[#0A4429]">No Assets Found</h3>
+            <p className="text-sm text-gray-500 mt-1 px-4">There are no properties matching your query or initialized inside your scope yet.</p>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredProperties.map((property) => {
+              const occupancyRate = property.total_units > 0 
+                ? Math.round((property.occupied_units / property.total_units) * 100) 
+                : 0;
 
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Occupied</h3>
-            <p className="text-3xl font-bold text-green-600 mt-2">108</p>
+              return (
+                <div 
+                  key={property.id}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group"
+                >
+                  {/* Card Header Content Banner */}
+                  <div className="bg-[#0A4429]/5 p-5 border-b border-gray-50 relative">
+                    <span className="absolute top-4 right-4 bg-white text-[#0A4429] font-medium text-xs px-2.5 py-1 rounded-full border border-gray-100 shadow-sm">
+                      {property.property_type}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-white rounded-xl text-[#2E9D47] border border-gray-100 shadow-sm">
+                        <Building2 size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-[#0A4429] group-hover:text-[#2E9D47] transition-colors">{property.name}</h3>
+                        <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                          <MapPin size={12} />
+                          {property.location}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operational Data Specifications Block */}
+                  <div className="p-5 flex-1 space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
+                        <p className="text-xs text-gray-400 flex items-center gap-1"><Grid size={12} /> Total Units</p>
+                        <p className="font-bold text-lg text-[#0A4429] mt-0.5">{property.total_units}</p>
+                      </div>
+                      <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100/50">
+                        <p className="text-xs text-gray-400 flex items-center gap-1"><Users size={12} /> Occupied</p>
+                        <p className="font-bold text-lg text-[#0A4429] mt-0.5">{property.occupied_units}</p>
+                      </div>
+                    </div>
+
+                    {/* Occupancy Indicator Status Bar */}
+                    <div>
+                      <div className="flex justify-between text-xs font-semibold mb-1.5">
+                        <span className="text-gray-500">Occupancy Velocity</span>
+                        <span className="text-[#2E9D47]">{occupancyRate}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-2 rounded-full">
+                        <div 
+                          className="bg-[#2E9D47] h-2 rounded-full transition-all duration-500" 
+                          style={{ width: `${occupancyRate}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-sm">
+                      <div>
+                        <p className="text-xs text-gray-400">Yield (Est. Monthly)</p>
+                        <p className="font-bold text-[#0A4429] text-base mt-0.5">{property.monthly_rent}</p>
+                      </div>
+                      <button className="flex items-center gap-1 font-semibold text-xs text-[#2E9D47] hover:text-[#0A4429] transition-colors bg-[#2E9D47]/5 px-3 py-1.5 rounded-lg group/btn">
+                        <span>Configure Units</span>
+                        <ChevronRight size={14} className="transform group-hover/btn:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
+        )}
 
-          <div className="bg-white p-5 rounded-xl shadow-sm">
-            <h3 className="text-gray-500">Vacant</h3>
-            <p className="text-3xl font-bold text-red-500 mt-2">12</p>
-          </div>
-        </div>
-
-        {/* Properties Grid */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <div
-              key={property.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition"
-            >
-              {/* Property Image */}
-              <div className="h-48 bg-gray-200 rounded-t-xl flex items-center justify-center">
-                <FaBuilding className="text-6xl text-gray-400" />
+        {/* Onboarding Drawer Side Sliding Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-xs">
+            <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+              
+              {/* Drawer Header Layout */}
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#0A4429] text-white">
+                <div>
+                  <h3 className="text-lg font-bold">Onboard New Property</h3>
+                  <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Initialize real estate infrastructure variables.</p>
+                </div>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition text-white"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
-              {/* Content */}
-              <div className="p-5">
-                <h3 className="text-xl font-bold text-gray-800">
-                  {property.name}
-                </h3>
-
-                <div className="flex items-center gap-2 text-gray-500 mt-2">
-                  <FaMapMarkerAlt />
-                  <span>{property.location}</span>
+              {/* Form Content Body Fields */}
+              <form onSubmit={handleAddProperty} className="p-6 flex-1 overflow-y-auto space-y-5">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Property / Building Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={newProperty.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Kilimani Heights"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition"
+                  />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mt-5">
-                  <div>
-                    <p className="text-gray-500 text-sm">Units</p>
-                    <p className="font-bold">{property.units}</p>
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Location / Address</label>
+                  <input
+                    type="text"
+                    name="location"
+                    required
+                    value={newProperty.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Kilimani, Nairobi"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition"
+                  />
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-gray-500 text-sm">Occupied</p>
-                    <p className="font-bold text-green-600">
-                      {property.occupied}
-                    </p>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Total Units</label>
+                    <input
+                      type="number"
+                      name="total_units"
+                      required
+                      value={newProperty.total_units}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 45"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition"
+                    />
                   </div>
-
                   <div>
-                    <p className="text-gray-500 text-sm">Vacant</p>
-                    <p className="font-bold text-red-500">
-                      {property.vacant}
-                    </p>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Property Classification</label>
+                    <select
+                      name="property_type"
+                      value={newProperty.property_type}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm bg-white transition"
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Mixed Use">Mixed Use</option>
+                    </select>
                   </div>
                 </div>
 
-                <div className="mt-5 border-t pt-4 flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-gray-500">
-                      Monthly Revenue
-                    </p>
-                    <p className="font-bold text-blue-600">
-                      {property.revenue}
-                    </p>
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Description (Optional)</label>
+                  <textarea
+                    name="description"
+                    rows="3"
+                    value={newProperty.description}
+                    onChange={handleInputChange}
+                    placeholder="Brief structural notations or layout notes..."
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition resize-none"
+                  ></textarea>
+                </div>
 
-                  <button className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg">
-                    View
+                <div className="pt-4 border-t border-gray-100 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl transition text-sm hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#2E9D47] hover:bg-[#0A4429] text-white font-medium py-2.5 rounded-xl transition text-sm shadow-sm"
+                  >
+                    Save Property
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
       </div>
     </Layout>
   );
