@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Layout from "../layouts/Layout";
 import Swal from "sweetalert2";
+import api from "../api/api"; 
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);
@@ -21,9 +22,10 @@ export default function Tenants() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [isAdding, setIsAdding] = useState(false);
 
   const [newTenant, setNewTenant] = useState({
-    name: "",
+    full_name: "",
     email: "",
     phone_number: "",
     property_name: "",
@@ -38,23 +40,19 @@ export default function Tenants() {
   const fetchTenants = async () => {
     try {
       setLoading(true);
-      
-      // Mock Data reflecting the operational tenant structure for the Nairobi pilot
-      const fallbackTenants = [
-        { id: 1, name: "Alex Njuguna", email: "alex@example.com", phone_number: "+254712345678", property_name: "Kilimani Heights", unit_number: "A-12", rent_amount: "55,000", status: "Paid" },
-        { id: 2, name: "Celestine Kilonzo", email: "celestine@example.com", phone_number: "+254722987654", property_name: "The Westlands Hub", unit_number: "Suite 4B", rent_amount: "120,000", status: "Pending" },
-        { id: 3, name: "Ian Kariuki", email: "ian@example.com", phone_number: "+254733112233", property_name: "Kilimani Heights", unit_number: "B-07", rent_amount: "45,000", status: "Paid" },
-        { id: 4, name: "Jane Doe", email: "jane@example.com", phone_number: "+254700445566", property_name: "Ngong Road Arcade", unit_number: "G-02", rent_amount: "35,000", status: "Overdue" },
-      ];
-
-      // const response = await axios.get("http://localhost:8000/api/tenants/", {
-      //   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      // });
-      // setTenants(response.data);
-
-      setTenants(fallbackTenants);
+  
+      const response = await api.get("/get_tenants/");
+      setTenants(response.data.tenants);
+      console.log(response.data);
     } catch (error) {
       console.error("Error loading tenants", error);
+      Swal.fire({
+      icon: "error",
+      title: "An error occured.",
+      text: "Failed to get tenants, please refresh the page.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
     } finally {
       setLoading(false);
     }
@@ -64,7 +62,7 @@ export default function Tenants() {
     setNewTenant({ ...newTenant, [e.target.name]: e.target.value });
   };
 
-  const handleAddTenant = (e) => {
+  const handleAddTenant = async (e) => {
     e.preventDefault();
     
     const createdTenant = {
@@ -72,10 +70,14 @@ export default function Tenants() {
       ...newTenant,
       status: "Pending"
     };
+     setIsAdding(true);
+    try{
+    const response = await api.post("/add_tenant/", createdTenant);
 
-    setTenants([createdTenant, ...tenants]);
-    setIsModalOpen(false);
-    setNewTenant({ name: "", email: "", phone_number: "", property_name: "", unit_number: "", rent_amount: "" });
+    if(response.status === 200 || response.status === 201){
+      setTenants([createdTenant, ...tenants]);
+      setIsModalOpen(false);
+      setNewTenant({ full_name: "", email: "", phone_number: "", property_name: "", unit_number: "", rent_amount: "" });
 
     Swal.fire({
       icon: "success",
@@ -84,6 +86,30 @@ export default function Tenants() {
       timer: 2000,
       showConfirmButton: false,
     });
+
+    }else{
+      Swal.fire({
+      icon: "error",
+      title: "Failed to add tenant.",
+      text: "Tenant was not added, please try again!.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+
+    }
+  }catch(err){
+    Swal.fire({
+      icon: "error",
+      title: "An error occured.",
+      text: "Failed to add tenant, please try again.",
+      timer: 2000,
+      showConfirmButton: false,
+    })
+  }finally{
+    setIsAdding(false);
+  }
+
+    
   };
 
   // Trigger local M-Pesa STK push workflow logic
@@ -146,7 +172,7 @@ export default function Tenants() {
             className="flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm text-sm self-start sm:self-center"
           >
             <Plus size={18} />
-            <span>Onboard Tenant</span>
+            <span>Add Tenant</span>
           </button>
         </div>
 
@@ -292,9 +318,9 @@ export default function Tenants() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Legal Name</label>
                   <input
                     type="text"
-                    name="name"
+                    name="full_name"
                     required
-                    value={newTenant.name}
+                    value={newTenant.full_name}
                     onChange={handleInputChange}
                     placeholder="e.g. John Doe"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
@@ -382,7 +408,12 @@ export default function Tenants() {
                     type="submit"
                     className="flex-1 bg-[#2E9D47] hover:bg-[#0A4429] text-white font-medium py-2.5 rounded-xl text-sm"
                   >
-                    Onboard Lease
+                    {isAdding ? (
+                      <div className="flex justify-center">
+                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                     </div>
+                     ) : "Add tenant" 
+                     }
                   </button>
                 </div>
               </form>

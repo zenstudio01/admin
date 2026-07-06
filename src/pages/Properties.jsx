@@ -14,12 +14,14 @@ import {
 import Layout from "../layouts/Layout";
 import Swal from "sweetalert2";
 import axios from "axios";
+import api from "../api/api"; 
 
 export default function Properties() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   
   const [newProperty, setNewProperty] = useState({
     name: "",
@@ -34,27 +36,21 @@ export default function Properties() {
     fetchProperties();
   }, []);
 
+
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+
+      const response = await api.get("/property_list/");
       
-      // Mock Data reflecting the Nairobi pilot profile for local testing if API isn't fully migrated
-      const fallbackData = [
-        { id: 1, name: "Kilimani Heights", location: "Kilimani, Nairobi", total_units: 45, occupied_units: 41, property_type: "Residential", monthly_rent: "KES 2.4M" },
-        { id: 2, name: "The Westlands Hub", location: "Westlands, Nairobi", total_units: 20, occupied_units: 18, property_type: "Commercial", monthly_rent: "KES 4.1M" },
-        { id: 3, name: "Ngong Road Arcade", location: "Ngong Road, Nairobi", total_units: 15, occupied_units: 12, property_type: "Mixed Use", monthly_rent: "KES 1.1M" },
-      ];
-
-      // Replace with your real backend endpoint when ready
-      // const response = await axios.get("http://localhost:8000/api/properties/", {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
-      // setProperties(response.data);
-
-      setProperties(fallbackData);
+      setProperties(response.data);
     } catch (error) {
-      console.error("Error fetching portfolios", error);
+      console.error("Error fetching portfolios from backend server", error);
+      Swal.fire({
+        icon: "error",
+        title: "Sync Error",
+        text: "Failed to retrieve your properties portfolio from the database.",
+      });
     } finally {
       setLoading(false);
     }
@@ -64,41 +60,35 @@ export default function Properties() {
     setNewProperty({ ...newProperty, [e.target.name]: e.target.value });
   };
 
+
+
   const handleAddProperty = async (e) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
-      const token = localStorage.getItem("token");
-      
-      // Opting for optimistic UI updates for mock tracking, replace with actual POST when backend is configured
-      // await axios.post("http://localhost:8000/api/properties/", newProperty, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
 
-      const createdAsset = {
-        id: Date.now(),
-        ...newProperty,
-        total_units: parseInt(newProperty.total_units) || 0,
-        occupied_units: 0,
-        monthly_rent: "KES 0"
-      };
+      const response = await api.post("/property_create/", newProperty);
 
-      setProperties([createdAsset, ...properties]);
+      setProperties([response.data, ...properties]);
       setIsModalOpen(false);
       setNewProperty({ name: "", location: "", total_units: "", property_type: "Residential", description: "" });
 
       Swal.fire({
         icon: "success",
         title: "Asset Registered",
-        text: "The new property has been successfully onboarded to your portfolio.",
+        text: "The new property has been successfully added.",
         timer: 2000,
         showConfirmButton: false,
       });
     } catch (error) {
+      console.error("Error committing asset allocation", error);
       Swal.fire({
         icon: "error",
         title: "Setup Failed",
-        text: error.response?.data?.message || "Something went wrong onboarding this property.",
+        text: error.response?.data?.message || "Something went wrong adding this property.",
       });
+    }finally {
+      setIsSaving(false);
     }
   };
 
@@ -240,7 +230,7 @@ export default function Properties() {
               {/* Drawer Header Layout */}
               <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#0A4429] text-white">
                 <div>
-                  <h3 className="text-lg font-bold">Onboard New Property</h3>
+                  <h3 className="text-lg font-bold">Add New Property</h3>
                   <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Initialize real estate infrastructure variables.</p>
                 </div>
                 <button 
@@ -331,7 +321,12 @@ export default function Properties() {
                     type="submit"
                     className="flex-1 bg-[#2E9D47] hover:bg-[#0A4429] text-white font-medium py-2.5 rounded-xl transition text-sm shadow-sm"
                   >
-                    Save Property
+                    {isSaving ? (
+                      <div className="flex justify-center">
+                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                     </div>
+                     ) : "Add Property"
+                    }
                   </button>
                 </div>
               </form>

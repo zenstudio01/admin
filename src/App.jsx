@@ -16,6 +16,7 @@ import Compliance from './pages/Compliance';
 import MaintenanceStore from './pages/MaintenanceStore';
 import AdminSettings from './pages/AdminSettings';
 import SubscriptionPackages from './pages/SubscriptionPackages';
+import ForgotPassword from './pages/ForgotPassword';
   
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/tenants" element={<Tenants />} />

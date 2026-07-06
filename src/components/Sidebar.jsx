@@ -8,6 +8,11 @@ import {
 
 import {
   LogOut,
+  Settings,
+  Store,
+  Package,
+  BadgeCheck,
+  UserCheck,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -48,27 +53,27 @@ export default function Sidebar() {
     {
       name: "Professional Services",
       path: "/professional-services",
-      icon: <FaTools />,
+      icon: <UserCheck />,
     },
     {
       name: "Compliance",
       path: "/compliance",
-      icon: <FaTools />,
+      icon: <BadgeCheck />,
     },
     {
       name: "Maintenance Store",
       path: "/maintenance-store",
-      icon: <FaTools />,
+      icon: <Store />,
     },
     {
       name: "Admin Settings",
       path: "/admin-settings",
-      icon: <FaTools />,
+      icon: <Settings />,
     },
     {
       name: "Subscription Packages",
       path: "/subscription-packages",
-      icon: <FaTools />,
+      icon: <Package />,
     }
   ];
 

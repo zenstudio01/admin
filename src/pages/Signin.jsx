@@ -40,10 +40,22 @@ export default function Signin() {
           body: JSON.stringify(formData),
         }
       );
+
+      if(response.status === 403){
+        Swal.fire({
+          icon: "info",
+          title: "Email Verification Required",
+          text: "Please verify your email before logging in. Check your inbox for a verification link.",
+        });
+        return;
+      }
+
+
+
       if(response.status == 200){
 
-      const data = response;
-      console.log("Data" + data.refresh_token);
+      const data = await response.json();
+      // console.log("Data" + data.user.user_name);
 
       // Store auth tokens and user data securely
       localStorage.setItem("access_token", data.access_token);
@@ -146,13 +158,38 @@ export default function Signin() {
               </div>
             </div>
 
+            {/* Remember Me */}
+              <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    className="accent-[#2E9D47]"
+                  />
+
+                  <span>Remember me</span>
+                </label>
+
+                <button
+                  type="button"
+                  className="text-[#2E9D47] hover:underline"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
             {/* Main Action Button utilizing brand greens */}
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-[#2E9D47] hover:bg-[#0A4429] text-white py-3 rounded-lg font-semibold shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
             >
-              {loading ? "Signing In..." : "Sign In"}
+              {loading ? (
+                      <div className="flex justify-center">
+                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                     </div>
+                     ) : "Sign In"
+              }
             </button>
 
             <div className="text-center mt-6 pt-2 border-t border-gray-100">

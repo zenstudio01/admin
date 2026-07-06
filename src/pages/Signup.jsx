@@ -12,9 +12,13 @@ import {
   ArrowRight,
   Truck 
 } from 'lucide-react';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+
 import { API_URL } from '../config/env';
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -73,6 +77,14 @@ const Signup = () => {
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Account created successfully! Redirecting to login...' });
+        Swal.fire({
+          icon: "success",
+          title: "Registration Successful",
+          text: "Your account has been created. Please sign in.",
+        });
+        setTimeout(() => {
+          navigate('/signin');
+        }, 1500);
       } else {
         setMessage({ type: 'error', text: data.message || 'Registration failed. Please check your details.' });
       }
@@ -269,7 +281,11 @@ const Signup = () => {
               disabled={isLoading}
               className="w-full flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#2E9D47]/90 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mt-2 text-sm"
             >
-              {isLoading ? 'Creating Account...' : 'Register Account'}
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : "Register Account"}
               {!isLoading && <ArrowRight size={16} />}
             </button>
 
