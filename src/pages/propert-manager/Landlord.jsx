@@ -12,8 +12,9 @@ import {
   FileCheck, 
   ArrowUpRight 
 } from "lucide-react";
-import Layout from "../layouts/Layout";
+import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
+import api from "../../api/api";
 
 export default function Landlords() {
   const [landlords, setLandlords] = useState([]);
@@ -36,20 +37,10 @@ export default function Landlords() {
   const fetchLandlords = async () => {
     try {
       setLoading(true);
-      
-      // Mock Data engineered to represent pilot landlords associated with managed portfolios
-      const fallbackLandlords = [
-        { id: 1, name: "Dr. Kobia", email: "kobia@example.com", phone_number: "+254722111222", properties_count: 2, total_units: 60, commission_rate: 10, last_payout: "KES 1.8M" },
-        { id: 2, name: "Gideon Ushindi", email: "gideon@nexindi.com", phone_number: "+254712345678", properties_count: 1, total_units: 15, commission_rate: 12, last_payout: "KES 968K" },
-        { id: 3, name: "Nairobi Corporate Holdings", email: "finance@ncholdings.co.ke", phone_number: "+254700999888", properties_count: 1, total_units: 20, commission_rate: 15, last_payout: "KES 3.4M" },
-      ];
 
-      // const response = await axios.get("http://localhost:8000/api/landlords/", {
-      //   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      // });
-      // setLandlords(response.data);
+      const response = await api.get("/landlords/");
+      setLandlords(response.data);
 
-      setLandlords(fallbackLandlords);
     } catch (error) {
       console.error("Error loading landlords database profile", error);
     } finally {

@@ -12,9 +12,9 @@ import {
   AlertCircle, 
   Send 
 } from "lucide-react";
-import Layout from "../layouts/Layout";
+import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
-import api from "../api/api"; 
+import api from "../../api/api"; 
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);

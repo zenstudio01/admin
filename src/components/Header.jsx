@@ -1,4 +1,6 @@
 export default function Header() {
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
   return (
     <header className="bg-white shadow-sm">
       <div className="px-8 py-4 flex justify-between items-center">
@@ -14,8 +16,8 @@ export default function Header() {
           />
 
           <div>
-            <h4 className="font-semibold">Property Manager</h4>
-            <p className="text-sm text-gray-500">Administrator</p>
+            <h4 className="font-semibold">{user?.user_name || "Admin User"}</h4>
+            <p className="text-sm text-gray-500">{user?.role || "No role"}</p>
           </div>
         </div>
       </div>

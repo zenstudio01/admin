@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Check, 
-  HelpCircle, 
   ShieldCheck, 
   Zap, 
   Building2, 
@@ -10,69 +9,33 @@ import {
   CreditCard,
   ArrowRight
 } from "lucide-react";
-import Layout from "../layouts/Layout";
+import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
+import api from "../../api/api";
 
 export default function SubscriptionPackages() {
   const [billingCycle, setBillingCycle] = useState("monthly"); // monthly or yearly
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [packages, setPackages] = useState([]);
 
-  // Dynamic pricing structural matrices
-  const plans = [
-    {
-      id: "tier_starter",
-      name: "Starter Bundle",
-      icon: Building2,
-      description: "Perfect for independent property managers managing small local blocks.",
-      monthlyPrice: 2500,
-      yearlyPrice: 24000,
-      features: [
-        "Up to 20 Unit Segments Mapped",
-        "Standard M-Pesa Daraja Integration",
-        "Basic Tenant Statement Logs",
-        "Next-Day Email Support Flow"
-      ],
-      color: "border-gray-200 hover:border-gray-400",
-      badge: null
-    },
-    {
-      id: "tier_growth",
-      name: "Growth Engine",
-      icon: Zap,
-      description: "Optimized for expanding tech ventures and corporate management firms.",
-      monthlyPrice: 6500,
-      yearlyPrice: 62400,
-      features: [
-        "Up to 150 Unit Segments Mapped",
-        "Instant M-Pesa STK Webhook Loops",
-        "Automated Compliance Tracking",
-        "Vendor Escrow Management Module",
-        "Priority Chat Support (Under 1Hr)"
-      ],
-      color: "border-[#2E9D47] ring-2 ring-[#2E9D47]/20",
-      badge: "Most Popular Choice"
-    },
-    {
-      id: "tier_enterprise",
-      name: "Enterprise Core",
-      icon: Crown,
-      description: "Full-scale white-label solution designed for unlimited multi-tenant networks.",
-      monthlyPrice: 15000,
-      yearlyPrice: 144000,
-      features: [
-        "Unlimited Property & Unit Vectors",
-        "Dedicated Daraja Shortcode Pipeline",
-        "Full RBAC Access Matrix Settings",
-        "Raw Database Telemetry Feeds",
-        "24/7 Dedicated Account Architect"
-      ],
-      color: "border-[#0A4429] shadow-md",
-      badge: "Corporate Elite"
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/packages/`);
+      setPackages(response.data.packages || []);
+    } catch (error) {
+      console.error("Failed to load global administrative infrastructure telemetry:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
 
   const handleOpenCheckout = (plan) => {
     setSelectedPlan(plan);
@@ -82,7 +45,6 @@ export default function SubscriptionPackages() {
   const handleMpesaStkPush = (e) => {
     e.preventDefault();
     
-    // Formatting validation rules for localized carriers
     let formattedPhone = phoneNumber.trim().replace(/\s+/g, "");
     if (formattedPhone.startsWith("0")) {
       formattedPhone = "254" + formattedPhone.substring(1);
@@ -100,7 +62,7 @@ export default function SubscriptionPackages() {
       return;
     }
 
-    const billableAmount = billingCycle === "monthly" ? selectedPlan.monthlyPrice : selectedPlan.yearlyPrice;
+    const billableAmount = billingCycle === "monthly" ? selectedPlan.monthly_price : selectedPlan.yearly_price;
 
     setIsCheckoutOpen(false);
     
@@ -114,7 +76,6 @@ export default function SubscriptionPackages() {
       }
     });
 
-    // Simulate Daraja Network Endpoint Gateway Latency Loop
     setTimeout(() => {
       Swal.close();
       Swal.fire({
@@ -125,6 +86,20 @@ export default function SubscriptionPackages() {
       });
       setPhoneNumber("");
     }, 4000);
+  };
+
+  // Safe mapping configuration for visual indicators based on plan items
+  const getPlanVisuals = (index) => {
+    const icons = [Zap, Building2, Crown];
+    const colors = [
+      "border-gray-200", 
+      "border-[#2E9D47] ring-1 ring-[#2E9D47]/30 bg-green-50/5", 
+      "border-[#0A4429] bg-[#0A4429]/5"
+    ];
+    return {
+      Icon: icons[index % icons.length],
+      color: colors[index % colors.length]
+    };
   };
 
   return (
@@ -165,69 +140,82 @@ export default function SubscriptionPackages() {
         </div>
 
         {/* Pricing Cards Structural Rendering Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-          {plans.map((plan) => {
-            const Icon = plan.icon;
-            const currentPrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
-            
-            return (
-              <div 
-                key={plan.id} 
-                className={`bg-white rounded-2xl border p-6 flex flex-col justify-between transition-all relative ${plan.color}`}
-              >
-                {plan.badge && (
-                  <span className="absolute -top-3 right-6 bg-[#2E9D47] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs">
-                    {plan.badge}
-                  </span>
-                )}
+        {loading ? (
+          <div className="text-center py-12 font-medium text-gray-500 text-sm">Loading package infrastructure...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+            {packages.map((plan, index) => {
+              const { Icon, color } = getPlanVisuals(index);
+              const currentPrice = billingCycle === "monthly" ? plan.monthly_price : plan.yearly_price;
+              
+              // Map API parameters directly into a clean features list representation
+              const dynamicFeatures = [
+                `${plan.number_of_units} System Operation Units`,
+                plan.mpesa_daraja ? "M-Pesa Daraja Integration Node" : "Standard Payments Only",
+                plan.email_notifications ? "Instant Email Notifications Trigger" : "No Automated Email Logs",
+                `Historical Logs Duration: ${plan.logs_duration}`,
+                `Valid for ${billingCycle === "monthly" ? plan.month_days : plan.year_days} absolute days`
+              ];
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-[#0A4429]/5 text-[#0A4429] rounded-xl">
-                      <Icon size={22} />
+              return (
+                <div 
+                  key={plan.id} 
+                  className={`bg-white rounded-2xl border p-6 flex flex-col justify-between transition-all relative ${color}`}
+                >
+                  {index === 1 && (
+                    <span className="absolute -top-3 right-6 bg-[#2E9D47] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs">
+                      Popular Tier
+                    </span>
+                  )}
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-[#0A4429]/5 text-[#0A4429] rounded-xl">
+                        <Icon size={22} />
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-gray-800 text-lg">{plan.name}</h3>
+                        <p className="text-xs text-gray-400 mt-0.5 leading-tight">{plan.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-extrabold text-gray-800 text-lg">{plan.name}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5 leading-tight">{plan.description}</p>
+
+                    {/* Operational Pricing Outputs */}
+                    <div className="py-2 border-y border-gray-50 flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-[#0A4429]">KES {currentPrice.toLocaleString()}</span>
+                      <span className="text-xs text-gray-400 font-semibold">/ {billingCycle === "monthly" ? "mo" : "yr"}</span>
                     </div>
+
+                    {/* Feature Lists Arrays */}
+                    <ul className="space-y-3">
+                      {dynamicFeatures.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-600">
+                          <span className="p-0.5 bg-green-50 text-green-600 rounded-md shrink-0 mt-0.5">
+                            <Check size={12} strokeWidth={3} />
+                          </span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  {/* Operational Pricing Outputs */}
-                  <div className="py-2 border-y border-gray-50 flex items-baseline gap-1">
-                    <span className="text-2xl font-black text-[#0A4429]">KES {currentPrice.toLocaleString()}</span>
-                    <span className="text-xs text-gray-400 font-semibold">/ {billingCycle === "monthly" ? "mo" : "yr"}</span>
+                  <div className="mt-8">
+                    <button
+                      onClick={() => handleOpenCheckout(plan)}
+                      className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs ${
+                        index === 1
+                          ? "bg-[#2E9D47] hover:bg-[#0A4429] text-white"
+                          : "bg-[#0A4429] hover:bg-[#2E9D47] text-white"
+                      }`}
+                    >
+                      <span>Activate Plan</span>
+                      <ArrowRight size={14} />
+                    </button>
                   </div>
-
-                  {/* Feature Lists Arrays */}
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-600">
-                        <span className="p-0.5 bg-green-50 text-green-600 rounded-md shrink-0 mt-0.5">
-                          <Check size={12} strokeWidth={3} />
-                        </span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
-
-                <div className="mt-8">
-                  <button
-                    onClick={() => handleOpenCheckout(plan)}
-                    className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs ${
-                      plan.id === "tier_growth"
-                        ? "bg-[#2E9D47] hover:bg-[#0A4429] text-white"
-                        : "bg-[#0A4429] hover:bg-[#2E9D47] text-white"
-                    }`}
-                  >
-                    <span>Activate Plan Configuration</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Dynamic M-Pesa STK Push Integration Modal */}
         {isCheckoutOpen && selectedPlan && (
@@ -253,7 +241,7 @@ export default function SubscriptionPackages() {
                   <p className="text-gray-400 mt-0.5">Billing Terms: Cycle variant ({billingCycle})</p>
                 </div>
                 <p className="text-base font-black text-[#0A4429]">
-                  KES {(billingCycle === "monthly" ? selectedPlan.monthlyPrice : selectedPlan.yearlyPrice).toLocaleString()}
+                  KES {(billingCycle === "monthly" ? selectedPlan.monthly_price : selectedPlan.yearly_price).toLocaleString()}
                 </p>
               </div>
 

@@ -11,10 +11,10 @@ import {
   SlidersHorizontal,
   ChevronRight
 } from "lucide-react";
-import Layout from "../layouts/Layout";
+import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
 import axios from "axios";
-import api from "../api/api"; 
+import api from "../../api/api"; 
 
 export default function Properties() {
   const [properties, setProperties] = useState([]);
@@ -63,6 +63,22 @@ export default function Properties() {
 
 
   const handleAddProperty = async (e) => {
+    const storedUser = localStorage.getItem("user");
+    const user = storedUser ? JSON.parse(storedUser) : null;
+
+    if(user.role != "property manager"){
+      Swal.fire({
+        icon: "error",
+        title: "Access Denied",
+        text: "You do not have permission to add properties.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      return;
+
+    }
+
     e.preventDefault();
     setIsSaving(true);
     try {

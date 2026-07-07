@@ -35,10 +35,10 @@ const Signup = () => {
 
   // Swapped out TENANT variant for Equipment Supplier architecture mapping
   const roles = [
-    { value: 'PM', label: 'Property Manager', icon: Building2 },
-    { value: 'LANDLORD', label: 'Landlord', icon: Users },
-    { value: 'SUPPLIER', label: 'Equipment Supplier', icon: Truck },
-    { value: 'PROVIDER', label: 'Service Provider / Fundi', icon: Briefcase },
+    { value: 'property manager', label: 'Property Manager', icon: Building2 },
+    { value: 'landlord', label: 'Landlord', icon: Users },
+    { value: 'equipment supplier', label: 'Equipment Supplier', icon: Truck },
+    { value: 'service provider', label: 'Service Provider / Fundi', icon: Briefcase },
   ];
 
   const handleInputChange = (e) => {

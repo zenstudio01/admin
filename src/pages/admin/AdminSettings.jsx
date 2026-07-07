@@ -13,7 +13,7 @@ import {
   CheckCircle,
   AlertOctagon
 } from "lucide-react";
-import Layout from "../layouts/Layout";
+import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
 
 export default function AdminSettings() {

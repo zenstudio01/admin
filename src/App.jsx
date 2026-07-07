@@ -4,19 +4,21 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // import Layout from './Components/Layout';
 import Signin from './pages/Signin';
 import Dashboard from './pages/Dashboard';
-import Properties from './pages/Properties';
-import Tenants from './pages/Tenants';
+import Properties from './pages/propert-manager/Properties';
+import Tenants from './pages/propert-manager/Tenants';
 import Index from './pages/Index';
 import Signup from './pages/Signup';
-import Landlords from './pages/Landlord';
-import Maintenance from './pages/Maintenance';
+import Landlords from './pages/propert-manager/Landlord';
+import Maintenance from './pages/propert-manager/Maintenance';
 import Finances from './pages/Finances';
 import ProfessionalServices from './pages/ProfessionalServices';
 import Compliance from './pages/Compliance';
-import MaintenanceStore from './pages/MaintenanceStore';
-import AdminSettings from './pages/AdminSettings';
-import SubscriptionPackages from './pages/SubscriptionPackages';
+import MaintenanceStore from './pages/admin/MaintenanceStore';
+import AdminSettings from './pages/admin/AdminSettings';
+import SubscriptionPackages from './pages/admin/SubscriptionPackages';
 import ForgotPassword from './pages/ForgotPassword';
+import UsersManagement from './pages/admin/Users';
+import AdminDashboard from './pages/admin/AdminDashboard';
   
 
 function App() {
@@ -40,6 +42,8 @@ function App() {
         <Route path="/maintenance-store" element={<MaintenanceStore />} />
         <Route path="/admin-settings" element={<AdminSettings />} />
         <Route path="/subscription-packages" element={<SubscriptionPackages />} />
+        <Route path="/user-management" element={<UsersManagement />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
       {/* </Layout> */}
     </Router>
