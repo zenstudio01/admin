@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Layout from "../layouts/Layout";
 import Swal from "sweetalert2";
+import api from "../api/api";
 
 export default function Finances() {
   const [transactions, setTransactions] = useState([]);
@@ -22,6 +23,10 @@ export default function Finances() {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("All");
+  const [payments, setPayments] = useState([]);
+  const [summary, setSummary] = useState([]);
+  const [isFetchingPayments, setIsFetchingPayments] = useState(false);
+  const [isFetchingSummary, setIsFetchingSummary] = useState(false);
 
   const [newExpense, setNewExpense] = useState({
     title: "",
@@ -32,29 +37,53 @@ export default function Finances() {
   });
 
   useEffect(() => {
-    fetchFinancialLedger();
+    fetchRentPayments();
+    fetchSummary();
   }, []);
 
-  const fetchFinancialLedger = async () => {
-    try {
-      setLoading(true);
-      
-      // Reconciled operational financial data points matching portfolio metrics
-      const fallbackTransactions = [
-        { id: 1, type: "Inflow", title: "Rent Payment - Unit A12 (Alex Njuguna)", property: "Kilimani Heights", amount: 55000, category: "Rent", date: "2026-07-02", status: "Settled", reference: "MPESA_TX_MK821" },
-        { id: 2, type: "Inflow", title: "Rent Payment - Suite 4B (Celestine Kilonzo)", property: "The Westlands Hub", amount: 120000, category: "Rent", date: "2026-07-01", status: "Settled", reference: "MPESA_TX_MK794" },
-        { id: 3, type: "Outflow", title: "Burst Pipeline Fundi Settlement", property: "Kilimani Heights", amount: 15000, category: "Maintenance", date: "2026-06-28", status: "Disbursed", reference: "BWB_PAY_0911" },
-        { id: 4, type: "Inflow", title: "Rent Payment - Unit B07 (Ian Kariuki)", property: "Kilimani Heights", amount: 45000, category: "Rent", date: "2026-06-25", status: "Settled", reference: "MPESA_TX_MK512" },
-        { id: 5, type: "Outflow", title: "Common Area Electricity Tokens", property: "Ngong Road Arcade", amount: 8500, category: "Utilities", date: "2026-06-24", status: "Disbursed", reference: "KPLC_TX_8810" },
-      ];
 
-      setTransactions(fallbackTransactions);
-    } catch (error) {
-      console.error("Error reading platform financial data streams", error);
-    } finally {
-      setLoading(false);
+  const fetchRentPayments = async () => {
+    setIsFetchingSummary(true);
+    try{
+      const response = await api.get("/prop/payment_summary/"); 
+      if(response.status === 200 || response.status === 201){
+        setSummary(response.data.summary);
+
+      }else{
+        alert("Failed to fetch payments");
+      }
+
+    }catch(error){
+      console.error("Error fetching payments", error);
+      alert("Error fetching payments")
+
+    }finally{
+      setIsFetchingSummary(false);
+
     }
-  };
+  }
+
+
+  const fetchSummary = async () => {
+    setIsFetchingSummary(true);
+    try{
+      const response = await api.get("/prop/get_payments/"); 
+      if(response.status === 200 || response.status === 201){
+        setPayments(response.data.payments);
+
+      }else{
+        alert("Failed to fetch payments");
+      }
+
+    }catch(error){
+      console.error("Error fetching payments", error);
+      alert("Error fetching payments")
+
+    }finally{
+      setIsFetchingSummary(false);
+
+    }
+  }
 
   const handleInputChange = (e) => {
     setNewExpense({ ...newExpense, [e.target.name]: e.target.value });
@@ -97,13 +126,19 @@ export default function Finances() {
   const estimatedCommission = totalInflows * platformCommissionRate;
   const netLandlordPayoutPool = totalInflows - totalOutflows - estimatedCommission;
 
-  const filteredTransactions = transactions.filter(t => {
-    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          t.property.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          t.reference.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === "All" || t.type === filterType;
-    return matchesSearch && matchesType;
-  });
+  const filteredTransactions = payments.filter((t) => {
+  const search = searchQuery.toLowerCase();
+
+  const matchesSearch =
+    (t.tenant_name || "").toLowerCase().includes(search) ||
+    (t.property_name || "").toLowerCase().includes(search) ||
+    (t.transaction_code || "").toLowerCase().includes(search);
+
+  const matchesType =
+    filterType === "All" || t.unit_name === filterType;
+
+  return matchesSearch && matchesType;
+});
 
   return (
     <Layout>
@@ -128,32 +163,32 @@ export default function Finances() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gross Inflows</p>
-              <h3 className="text-xl font-bold text-[#0A4429] mt-1">KES {totalInflows.toLocaleString()}</h3>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Transactions</p>
+              <h3 className="text-xl font-bold text-[#0A4429] mt-1">KES {summary.total_transactions}</h3>
             </div>
             <div className="p-3 bg-green-50 text-[#2E9D47] rounded-xl"><TrendingUp size={22} /></div>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Operating Losses</p>
-              <h3 className="text-xl font-bold text-red-600 mt-1">KES {totalOutflows.toLocaleString()}</h3>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Collected</p>
+              <h3 className="text-xl font-bold text-red-600 mt-1">KES {summary.total_collected}</h3>
             </div>
             <div className="p-3 bg-red-50 text-red-600 rounded-xl"><TrendingDown size={22} /></div>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform Split (10%)</p>
-              <h3 className="text-xl font-bold text-blue-600 mt-1">KES {estimatedCommission.toLocaleString()}</h3>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total pending</p>
+              <h3 className="text-xl font-bold text-blue-600 mt-1">KES {summary.total_pending}</h3>
             </div>
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><Receipt size={22} /></div>
           </div>
 
           <div className="bg-[#0A4429] p-5 rounded-2xl shadow-sm text-white flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-[#F4F1E6]/70 uppercase tracking-wider">Net Owner Payouts</p>
-              <h3 className="text-xl font-bold text-[#F4F1E6] mt-1">KES {netLandlordPayoutPool.toLocaleString()}</h3>
+              <p className="text-xs font-semibold text-[#F4F1E6]/70 uppercase tracking-wider">Paid Transactions</p>
+              <h3 className="text-xl font-bold text-[#F4F1E6] mt-1">KES {summary.paid_transactions}</h3>
             </div>
             <div className="p-3 bg-white/10 text-[#F4F1E6] rounded-xl"><Wallet size={22} /></div>
           </div>
@@ -192,15 +227,15 @@ export default function Finances() {
         </div>
 
         {/* Financial Transactions Ledger Pipeline View */}
-        {loading ? (
+        {isFetchingPayments ? (
           <div className="flex justify-center py-20">
             <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredTransactions.length === 0 ? (
           <div className="bg-white text-center rounded-2xl p-12 border border-dashed border-gray-200 max-w-md mx-auto mt-10">
             <Receipt size={48} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-[#0A4429]">No Ledger Logs</h3>
-            <p className="text-sm text-gray-500 mt-1 px-4">There are no structural balance movements detected within the scope parameter bounds.</p>
+            <h3 className="text-lg font-bold text-[#0A4429]">No payments found</h3>
+            <p className="text-sm text-gray-500 mt-1 px-4">You do not have any payment transactions.</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -208,35 +243,35 @@ export default function Finances() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#0A4429]/5 text-[#0A4429] font-semibold text-xs uppercase tracking-wider border-b border-gray-100">
-                    <th className="p-4">Transaction Profile</th>
-                    <th className="p-4">Asset Origin</th>
-                    <th className="p-4">Gateway Reference</th>
-                    <th className="p-4">Classification</th>
-                    <th className="p-4 text-right">Value Delta</th>
+                    <th className="p-4">Tenant</th>
+                    <th className="p-4">Phone number</th>
+                    <th className="p-4">Property</th>
+                    <th className="p-4">Unit</th>
+                    <th className="p-4">Amount</th>
+                    <th className="p-4">Transaction ID</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 text-sm">
                   {filteredTransactions.map((tx) => (
                     <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="p-4 flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${tx.type === "Inflow" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
-                          {tx.type === "Inflow" ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                        </div>
+                        
                         <div>
-                          <div className="font-semibold text-gray-800">{tx.title}</div>
-                          <div className="text-[11px] text-gray-400 mt-0.5">{tx.date}</div>
+                          <div className="font-semibold text-gray-800">{tx.tenant_name}</div>
+                          <div className="text-[11px] text-gray-400 mt-0.5">{tx.payment_date}</div>
                         </div>
                       </td>
-                      <td className="p-4 font-medium text-gray-700">{tx.property}</td>
-                      <td className="p-4"><code className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-mono">{tx.reference}</code></td>
+                      <td className="p-4 font-medium text-gray-700">{tx.phone_number}</td>
+                      <td className="p-4 font-medium text-gray-700">{tx.property_name}</td>
                       <td className="p-4">
                         <span className="text-xs bg-gray-100 px-2.5 py-1 rounded-md text-gray-600 font-medium">
-                          {tx.category}
+                          {tx.unit_name}
                         </span>
                       </td>
-                      <td className={`p-4 text-right font-bold text-base ${tx.type === "Inflow" ? "text-green-600" : "text-red-600"}`}>
-                        {tx.type === "Inflow" ? "+" : "-"} KES {tx.amount.toLocaleString()}
+                      <td className="p-4 text-left font-bold text-base text-green-600">
+                        KES {tx.amount.toLocaleString()}
                       </td>
+                      <td className="p-4 font-medium text-gray-700">{tx.transaction_code}</td>
                     </tr>
                   ))}
                 </tbody>

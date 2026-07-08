@@ -22,16 +22,19 @@ export default function Landlords() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [newLndlord, setNewLandlord] = useState({
+  const [properties, setProperties] = useState([]);
+
+  const [newLandlord, setNewLandlord] = useState({
     name: "",
     email: "",
     phone_number: "",
-    commission_rate: "10", // Default MVP subscription/commission split floor
+    commission_rate: "", // Default MVP subscription/commission split floor
     assigned_properties: "",
   });
 
   useEffect(() => {
     fetchLandlords();
+    fetchProperties();
   }, []);
 
   const fetchLandlords = async () => {
@@ -48,8 +51,17 @@ export default function Landlords() {
     }
   };
 
+  const fetchProperties = async () => {
+  try {
+    const response = await api.get("/property_list/");
+    setProperties(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
   const handleInputChange = (e) => {
-    setNewLandlord({ ...newLndlord, [e.target.name]: e.target.value });
+    setNewLandlord({ ...newLandlord, [e.target.name]: e.target.value });
   };
 
   const handleAddLandlord = (e) => {
@@ -57,12 +69,12 @@ export default function Landlords() {
     
     const createdLandlord = {
       id: Date.now(),
-      name: newLndlord.name,
-      email: newLndlord.email,
-      phone_number: newLndlord.phone_number,
-      properties_count: newLndlord.assigned_properties ? newLndlord.assigned_properties.split(",").length : 0,
+      name: newLandlord.name,
+      email: newLandlord.email,
+      phone_number: newLandlord.phone_number,
+      properties_count: newLandlord.assigned_properties ? newLandlord.assigned_properties.split(",").length : 0,
       total_units: 0,
-      commission_rate: parseFloat(newLndlord.commission_rate) || 10,
+      commission_rate: parseFloat(newLandlord.commission_rate) || 10,
       last_payout: "KES 0"
     };
 
@@ -107,7 +119,7 @@ export default function Landlords() {
         {/* Module Header Elements */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Landlord Ledger</h1>
+            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Landlords</h1>
             <p className="text-sm text-gray-500 mt-1">Manage asset owners, custom commission contracts, and automated financial disbursements.</p>
           </div>
           <button
@@ -115,7 +127,7 @@ export default function Landlords() {
             className="flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm text-sm self-start sm:self-center"
           >
             <Plus size={18} />
-            <span>Add Asset Owner</span>
+            <span>Add Landlord</span>
           </button>
         </div>
 
@@ -215,7 +227,7 @@ export default function Landlords() {
               
               <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#0A4429] text-white">
                 <div>
-                  <h3 className="text-lg font-bold">Register Landlord Account</h3>
+                  <h3 className="text-lg font-bold">Add Landlord</h3>
                   <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Initialize external asset legal entities.</p>
                 </div>
                 <button 
@@ -228,38 +240,38 @@ export default function Landlords() {
 
               <form onSubmit={handleAddLandlord} className="p-6 flex-1 overflow-y-auto space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Legal / Corporate Name</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Name</label>
                   <input
                     type="text"
                     name="name"
                     required
-                    value={newLndlord.name}
+                    value={newLandlord.name}
                     onChange={handleInputChange}
-                    placeholder="e.g. Dr. Kobia"
+                    placeholder="e.g. Simon Waweru"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Official Email Address</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Email Address</label>
                   <input
                     type="email"
                     name="email"
                     required
-                    value={newLndlord.email}
+                    value={newLandlord.email}
                     onChange={handleInputChange}
-                    placeholder="name@landlorddomain.com"
+                    placeholder="johndoe@example.com"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Phone Number (Payout Destination)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Phone Number</label>
                   <input
                     type="tel"
                     name="phone_number"
                     required
-                    value={newLndlord.phone_number}
+                    value={newLandlord.phone_number}
                     onChange={handleInputChange}
                     placeholder="e.g. +254722111222"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
@@ -267,7 +279,7 @@ export default function Landlords() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Management Contract Commission Take Rate (%)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Management Commission (%)</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs font-semibold">%</span>
                     <input
@@ -276,7 +288,7 @@ export default function Landlords() {
                       required
                       min="10"
                       max="20"
-                      value={newLndlord.commission_rate}
+                      value={newLandlord.commission_rate}
                       onChange={handleInputChange}
                       placeholder="Standard range: 10 - 20"
                       className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
@@ -286,16 +298,26 @@ export default function Landlords() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Assign Initial Properties (Comma separated)</label>
-                  <input
-                    type="text"
-                    name="assigned_properties"
-                    value={newLndlord.assigned_properties}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Kilimani Heights, Westlands Hub"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
-                  />
-                </div>
+  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+    Select Property
+  </label>
+
+  <select
+    name="assigned_properties"
+    value={newLandlord.assigned_properties}
+    onChange={handleInputChange}
+    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm bg-white"
+    required
+  >
+    <option value="">Select Property</option>
+
+    {properties.map((property) => (
+      <option key={property.id} value={property.id}>
+        {property.name}
+      </option>
+    ))}
+  </select>
+</div>
 
                 <div className="pt-4 border-t border-gray-100 flex gap-3">
                   <button
@@ -309,7 +331,7 @@ export default function Landlords() {
                     type="submit"
                     className="flex-1 bg-[#2E9D47] hover:bg-[#0A4429] text-white font-medium py-2.5 rounded-xl text-sm"
                   >
-                    Create Account
+                    Add Landlord
                   </button>
                 </div>
               </form>

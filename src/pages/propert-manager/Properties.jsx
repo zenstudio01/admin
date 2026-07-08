@@ -120,7 +120,7 @@ export default function Properties() {
         {/* Module Header Elements */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Property Portfolio</h1>
+            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Properties</h1>
             <p className="text-sm text-gray-500 mt-1">Manage physical real estate assets, tracking configurations, and tenants.</p>
           </div>
           <button
@@ -128,7 +128,7 @@ export default function Properties() {
             className="flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm shadow-[#2E9D47]/10 text-sm self-start sm:self-center"
           >
             <Plus size={18} />
-            <span>Onboard Property</span>
+            <span>Add Property</span>
           </button>
         </div>
 

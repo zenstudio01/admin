@@ -164,7 +164,7 @@ export default function Tenants() {
         {/* Module Header Elements */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Tenant Directory</h1>
+            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Tenants</h1>
             <p className="text-sm text-gray-500 mt-1">Monitor tenant records, active leases, and digital rent collection statuses.</p>
           </div>
           <button
