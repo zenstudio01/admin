@@ -10,7 +10,8 @@ import {
   Eye, 
   EyeOff, 
   ArrowRight,
-  Truck 
+  Truck,
+  Store, 
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +40,7 @@ const Signup = () => {
     { value: 'landlord', label: 'Landlord', icon: Users },
     { value: 'equipment supplier', label: 'Equipment Supplier', icon: Truck },
     { value: 'service provider', label: 'Service Provider / Fundi', icon: Briefcase },
+    { value: 'store owner', label: 'Store Owner', icon: Store },
   ];
 
   const handleInputChange = (e) => {

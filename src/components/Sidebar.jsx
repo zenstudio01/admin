@@ -13,6 +13,7 @@ import {
   Package,
   BadgeCheck,
   UserCheck,
+  ShoppingBasket,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -90,6 +91,30 @@ export default function Sidebar() {
       path: "/maintenance-store",
       icon: <Store />,
       roles: ["admin", "property manager", "landlord", "TENANT"],
+    },
+    {
+      name: "Dashboard",
+      path: "/store-owner-dashboard",
+      icon: <FaHome />,
+      roles: ["store owner"],
+    },
+    {
+      name: "Products",
+      path: "/store-owner-products",
+      icon: <Package />,
+      roles: ["store owner"],
+    },
+    {
+      name: "Orders",
+      path: "/store-owner-orders",
+      icon: <ShoppingBasket />,
+      roles: ["store owner"],
+    },
+    {
+      name: "Store Profile",
+      path: "/store-owner-profile",
+      icon: <UserCheck />,
+      roles: ["store owner"],
     },
     {
       name: "Admin Settings",

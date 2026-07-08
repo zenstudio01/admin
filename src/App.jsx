@@ -19,6 +19,11 @@ import SubscriptionPackages from './pages/admin/SubscriptionPackages';
 import ForgotPassword from './pages/ForgotPassword';
 import UsersManagement from './pages/admin/Users';
 import AdminDashboard from './pages/admin/AdminDashboard';
+
+import StoreOwnerDashboard from './pages/store-owner/StoreOwnerDashboard';
+import Products from './pages/store-owner/Products';
+import OrderManagement from './pages/store-owner/Orders';
+import StoreProfile from './pages/store-owner/StoreProfile';
   
 
 function App() {
@@ -44,6 +49,12 @@ function App() {
         <Route path="/subscription-packages" element={<SubscriptionPackages />} />
         <Route path="/user-management" element={<UsersManagement />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+        {/* store owner routes */}
+        <Route path="/store-owner-dashboard" element={<StoreOwnerDashboard />} />
+        <Route path="/store-owner-products" element={<Products />} />
+        <Route path="/store-owner-orders" element={<OrderManagement />} />
+        <Route path="/store-owner-profile" element={<StoreProfile />} />
       </Routes>
       {/* </Layout> */}
     </Router>

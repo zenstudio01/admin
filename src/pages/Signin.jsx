@@ -69,8 +69,16 @@ export default function Signin() {
         timer: 1500,
         showConfirmButton: false,
       });
+      alert("Role: " + data.user.role);
 
-      navigate("/dashboard");
+      if(data.user.role === "property_manager"){
+        navigate("/dashboard");
+      }else if(data.user.role === "store owner"){
+        navigate("/store-owner-dashboard");
+      }else{
+        navigate("/dashboard");
+      }
+
     }else{
       Swal.fire({
         icon: "error",
