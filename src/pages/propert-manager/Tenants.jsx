@@ -30,7 +30,6 @@ export default function Tenants() {
     phone_number: "",
     property_name: "",
     unit_number: "",
-    rent_amount: "",
   });
 
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function Tenants() {
     if(response.status === 200 || response.status === 201){
       setTenants([createdTenant, ...tenants]);
       setIsModalOpen(false);
-      setNewTenant({ full_name: "", email: "", phone_number: "", property_name: "", unit_number: "", rent_amount: "" });
+      setNewTenant({ full_name: "", email: "", phone_number: "", property_name: "", unit_number: "" });
 
     Swal.fire({
       icon: "success",
@@ -380,21 +379,6 @@ export default function Tenants() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Monthly Rent Cost (KES)</label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs font-semibold">KES</span>
-                    <input
-                      type="number"
-                      name="rent_amount"
-                      required
-                      value={newTenant.rent_amount}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 55000"
-                      className="w-full pl-12 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
-                    />
-                  </div>
-                </div>
 
                 <div className="pt-4 border-t border-gray-100 flex gap-3">
                   <button

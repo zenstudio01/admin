@@ -24,6 +24,13 @@ import StoreOwnerDashboard from './pages/store-owner/StoreOwnerDashboard';
 import Products from './pages/store-owner/Products';
 import OrderManagement from './pages/store-owner/Orders';
 import StoreProfile from './pages/store-owner/StoreProfile';
+
+
+import Units from './pages/propert-manager/Units';
+
+
+
+import Home from './pages/Home';
   
 
 function App() {
@@ -32,7 +39,8 @@ function App() {
     <Router>
       {/* <Layout> */}
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/index" element={<Index />} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -55,6 +63,10 @@ function App() {
         <Route path="/store-owner-products" element={<Products />} />
         <Route path="/store-owner-orders" element={<OrderManagement />} />
         <Route path="/store-owner-profile" element={<StoreProfile />} />
+
+
+        {/* property manager units route */}
+        <Route path="/property-manager-unit" element={<Units />} />
       </Routes>
       {/* </Layout> */}
     </Router>

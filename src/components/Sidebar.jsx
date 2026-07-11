@@ -93,6 +93,12 @@ export default function Sidebar() {
       roles: ["admin", "property manager", "landlord", "TENANT"],
     },
     {
+      name: "Units",
+      path: "/property-manager-unit",
+      icon: <Store />,
+      roles: ["property manager"],
+    },
+    {
       name: "Dashboard",
       path: "/store-owner-dashboard",
       icon: <FaHome />,
@@ -126,7 +132,7 @@ export default function Sidebar() {
       name: "Subscription Packages",
       path: "/subscription-packages",
       icon: <Package />,
-      roles: ["admin", "property manager"],
+      roles: ["store owner","admin", "property manager"],
     },
   ];
 

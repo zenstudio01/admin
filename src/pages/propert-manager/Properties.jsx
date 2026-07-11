@@ -9,7 +9,8 @@ import {
   DollarSign, 
   X, 
   SlidersHorizontal,
-  ChevronRight
+  ChevronRight,
+  ImagePlus,
 } from "lucide-react";
 import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
@@ -22,6 +23,8 @@ export default function Properties() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  const [selectedImages, setSelectedImages] = useState([]);
   
   const [newProperty, setNewProperty] = useState({
     name: "",
@@ -83,8 +86,29 @@ export default function Properties() {
     setIsSaving(true);
     try {
 
-      const response = await api.post("/property_create/", newProperty);
+      const formData = new FormData();
 
+formData.append("name", newProperty.name);
+formData.append("location", newProperty.location);
+formData.append("total_units", newProperty.total_units);
+formData.append("property_type", newProperty.property_type);
+formData.append("description", newProperty.description);
+
+selectedImages.forEach((image) => {
+  formData.append("images", image);
+});
+
+const response = await api.post(
+  "/property_create/",
+  formData,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
+      
+      setSelectedImages([]);
       setProperties([response.data, ...properties]);
       setIsModalOpen(false);
       setNewProperty({ name: "", location: "", total_units: "", property_type: "Residential", description: "" });
@@ -324,6 +348,48 @@ export default function Properties() {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition resize-none"
                   ></textarea>
                 </div>
+
+                <div>
+  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+    Property Images
+  </label>
+
+  <label className="border-2 border-dashed border-gray-300 rounded-xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-[#2E9D47] transition">
+
+    <ImagePlus size={40} className="text-[#2E9D47]" />
+
+    <p className="text-sm text-gray-500 mt-2">
+      Click to upload images
+    </p>
+
+    <input
+      type="file"
+      multiple
+      accept="image/*"
+      hidden
+      onChange={(e) =>
+        setSelectedImages(Array.from(e.target.files))
+      }
+    />
+
+  </label>
+
+  {selectedImages.length > 0 && (
+    <div className="grid grid-cols-3 gap-2 mt-4">
+
+      {selectedImages.map((image, index) => (
+        <img
+          key={index}
+          src={URL.createObjectURL(image)}
+          alt=""
+          className="w-full h-24 rounded-lg object-cover"
+        />
+      ))}
+
+    </div>
+  )}
+
+</div>
 
                 <div className="pt-4 border-t border-gray-100 flex gap-3">
                   <button

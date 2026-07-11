@@ -181,7 +181,7 @@ export default function SubscriptionPackages() {
 
                     {/* Operational Pricing Outputs */}
                     <div className="py-2 border-y border-gray-50 flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-[#0A4429]">KES {currentPrice.toLocaleString()}</span>
+                      <span className="text-2xl font-black text-[#0A4429]">Ksh {currentPrice.toLocaleString()}</span>
                       <span className="text-xs text-gray-400 font-semibold">/ {billingCycle === "monthly" ? "mo" : "yr"}</span>
                     </div>
 
@@ -241,7 +241,7 @@ export default function SubscriptionPackages() {
                   <p className="text-gray-400 mt-0.5">Billing Terms: Cycle variant ({billingCycle})</p>
                 </div>
                 <p className="text-base font-black text-[#0A4429]">
-                  KES {(billingCycle === "monthly" ? selectedPlan.monthly_price : selectedPlan.yearly_price).toLocaleString()}
+                  Ksh {(billingCycle === "monthly" ? selectedPlan.monthly_price : selectedPlan.yearly_price).toLocaleString()}
                 </p>
               </div>
 
