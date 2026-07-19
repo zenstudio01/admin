@@ -43,12 +43,13 @@ export default function HomeHeader(){
                   <div className="flex justify-between h-20 items-center">
                     
                     {/* Logo */}
-                    <div className="flex items-center gap-2 group cursor-pointer">
-                      <div className="w-10 h-10 bg-[#0A4429] rounded-xl flex items-center justify-center shadow-md shadow-emerald-900/20 group-hover:rotate-6 transition-all duration-300">
-                        <span className="text-white font-black text-xl tracking-tighter">U</span>
-                      </div>
-                      <span className="text-2xl font-black text-[#0A4429] tracking-tight group-hover:text-[#22C55E] transition-colors duration-300">UNIT</span>
-                    </div>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md shadow-emerald-900/20 p-1 group-hover:scale-105 transition-all duration-300">
+  <img
+    src="/unit_logo.png"
+    alt="UNIT Logo"
+    className="w-full h-full object-contain"
+  />
+</div>
         
                     {/* Desktop Navigation Links */}
                     <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
