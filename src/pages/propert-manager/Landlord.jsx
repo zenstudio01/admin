@@ -64,32 +64,47 @@ export default function Landlords() {
     setNewLandlord({ ...newLandlord, [e.target.name]: e.target.value });
   };
 
-  const handleAddLandlord = (e) => {
-    e.preventDefault();
-    
-    const createdLandlord = {
-      id: Date.now(),
+  const handleAddLandlord = async (e) => {
+  e.preventDefault();
+
+  try {
+
+    await api.post("/landlords/add_landlord/", {
       name: newLandlord.name,
       email: newLandlord.email,
       phone_number: newLandlord.phone_number,
-      properties_count: newLandlord.assigned_properties ? newLandlord.assigned_properties.split(",").length : 0,
-      total_units: 0,
-      commission_rate: parseFloat(newLandlord.commission_rate) || 10,
-      last_payout: "KES 0"
-    };
-
-    setLandlords([createdLandlord, ...landlords]);
-    setIsModalOpen(false);
-    setNewLandlord({ name: "", email: "", phone_number: "", commission_rate: "10", assigned_properties: "" });
+      commission_rate: newLandlord.commission_rate,
+      property_id: newLandlord.assigned_properties,
+    });
 
     Swal.fire({
       icon: "success",
-      title: "Asset Owner Added",
-      text: "Landlord profile created successfully with standard commission tracking overrides.",
-      timer: 2000,
-      showConfirmButton: false,
+      title: "Success",
+      text: "Landlord added successfully.",
     });
-  };
+
+    fetchLandlords();
+
+    setIsModalOpen(false);
+
+    setNewLandlord({
+      name: "",
+      email: "",
+      phone_number: "",
+      commission_rate: "",
+      assigned_properties: "",
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Unable to add landlord.",
+    });
+  }
+};
 
   const triggerPayoutSettlement = (landlord) => {
     Swal.fire({

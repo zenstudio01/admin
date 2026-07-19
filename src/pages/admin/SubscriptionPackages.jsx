@@ -88,6 +88,44 @@ export default function SubscriptionPackages() {
     }, 4000);
   };
 
+  const payWithPaystack = () => {
+  const handler = window.PaystackPop.setup({
+    key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+
+    email: user.email,
+
+    amount:
+      (billingCycle === "monthly"
+        ? selectedPlan.monthly_price
+        : selectedPlan.yearly_price) * 100,
+
+    currency: "KES",
+
+    ref: "UNIT-" + Date.now(),
+
+    metadata: {
+      package_id: selectedPlan.id,
+      billing_cycle: billingCycle,
+    },
+
+    callback: function (response) {
+      verifyPayment(response.reference);
+    },
+
+    onClose: function () {
+      console.log("Payment cancelled");
+    },
+  });
+
+  handler.openIframe();
+};
+
+const verifyPayment = async (reference) => {
+    await api.post("/verify_paystack_payment/", {
+        reference,
+    });
+};
+
   // Safe mapping configuration for visual indicators based on plan items
   const getPlanVisuals = (index) => {
     const icons = [Zap, Building2, Crown];

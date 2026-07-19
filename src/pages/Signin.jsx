@@ -69,13 +69,15 @@ export default function Signin() {
         timer: 1500,
         showConfirmButton: false,
       });
-      alert("Role: " + data.user.role);
 
       if(data.user.role === "property_manager"){
         navigate("/dashboard");
       }else if(data.user.role === "store owner"){
         navigate("/store-owner-dashboard");
-      }else{
+      }else if(data.user.role === "landlord"){
+        navigate("/landlord-dashboard");
+      }
+      else{
         navigate("/dashboard");
       }
 
@@ -109,11 +111,14 @@ export default function Signin() {
       <div className="w-full max-w-md">
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-[#0A4429]/10">
           <div className="flex justify-center mb-6">
-            {/* Styled using the primary logo green */}
-            <div className="bg-[#2E9D47] p-4 rounded-full shadow-md shadow-[#2E9D47]/20">
-              <FaBuilding className="text-white text-3xl" />
-            </div>
-          </div>
+  <div className="p-3 rounded-full shadow-lg border border-gray-200">
+    <img
+      src="/unit_logo.png" // Update with your logo path
+      alt="UNIT Logo"
+      className="w-16 h-16 object-contain rounded-full"
+    />
+  </div>
+</div>
 
           <h1 className="text-3xl font-bold text-center text-[#0A4429]">
             Welcome Back

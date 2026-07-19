@@ -53,11 +53,15 @@ export default function ForgotPassword() {
     <div className="min-h-screen bg-[#F4F1E6]/40 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto w-full max-w-md">
         {/* Core Platform Logo Brand Frame */}
-        <div className="flex justify-center">
-          <div className="p-3.5 bg-[#0A4429] rounded-2xl text-white shadow-md">
-            <KeyRound size={28} />
-          </div>
-        </div>
+        <div className="flex justify-center mb-6">
+  <div className="bg-white p-3 rounded-full shadow-lg border border-gray-200">
+    <img
+      src="/unit_logo.png" // Update with your logo path
+      alt="UNIT Logo"
+      className="w-16 h-16 object-contain rounded-full"
+    />
+  </div>
+</div>
         <h2 className="mt-6 text-center text-3xl font-bold text-[#0A4429] tracking-tight">
           Reset Your Password
         </h2>

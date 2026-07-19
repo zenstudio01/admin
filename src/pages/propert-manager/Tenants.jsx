@@ -23,17 +23,22 @@ export default function Tenants() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [isAdding, setIsAdding] = useState(false);
+  const [properties, setProperties] = useState([]);
+  const [units, setUnits] = useState([]);
 
   const [newTenant, setNewTenant] = useState({
-    full_name: "",
-    email: "",
-    phone_number: "",
-    property_name: "",
-    unit_number: "",
-  });
+  full_name: "",
+  email: "",
+  phone_number: "",
+  id_number: "",
+  emergency_contact: "",
+  property: "",
+  unit: "",
+});
 
   useEffect(() => {
     fetchTenants();
+    fetchProperties();
   }, []);
 
   const fetchTenants = async () => {
@@ -57,9 +62,40 @@ export default function Tenants() {
     }
   };
 
-  const handleInputChange = (e) => {
-    setNewTenant({ ...newTenant, [e.target.name]: e.target.value });
-  };
+  const fetchProperties = async () => {
+  try {
+    const response = await api.get("/get_properties_with_units/");
+    setProperties(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+const handlePropertyChange = (e) => {
+    const propertyId = e.target.value;
+
+    const selectedProperty = properties.find(
+        (p) => String(p.id) === propertyId
+    );
+
+    setNewTenant({
+        ...newTenant,
+        property: propertyId,
+        unit: "",
+    });
+
+    setUnits(selectedProperty ? selectedProperty.units : []);
+};
+
+ const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setNewTenant((prev) => ({
+        ...prev,
+        [name]: value,
+    }));
+};
 
   const handleAddTenant = async (e) => {
     e.preventDefault();
@@ -80,7 +116,7 @@ export default function Tenants() {
 
     Swal.fire({
       icon: "success",
-      title: "Tenant Onboarded",
+      title: "Tenant added successfully",
       text: "Tenant has been registered and assigned to their unit.",
       timer: 2000,
       showConfirmButton: false,
@@ -226,9 +262,9 @@ export default function Tenants() {
                 <thead>
                   <tr className="bg-[#0A4429]/5 text-[#0A4429] font-semibold text-xs uppercase tracking-wider border-b border-gray-100">
                     <th className="p-4">Tenant Info</th>
-                    <th className="p-4">Placement Asset</th>
-                    <th className="p-4">Financial Commitment</th>
-                    <th className="p-4">Collection Health</th>
+                    <th className="p-4">Property</th>
+                    <th className="p-4">Rent amount</th>
+                    <th className="p-4">Rent status</th>
                     <th className="p-4 text-center">Actions</th>
                   </tr>
                 </thead>
@@ -301,8 +337,8 @@ export default function Tenants() {
               
               <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#0A4429] text-white">
                 <div>
-                  <h3 className="text-lg font-bold">Onboard Lease Tenant</h3>
-                  <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Bind users to explicit unit mappings.</p>
+                  <h3 className="text-lg font-bold">Add Tenant</h3>
+                  <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Add tenant to your property.</p>
                 </div>
                 <button 
                   onClick={() => setIsModalOpen(false)}
@@ -352,30 +388,73 @@ export default function Tenants() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">ID number</label>
+                  <input
+                    type="text"
+                    name="id_number"
+                    required
+                    value={newTenant.id_number}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 12345678"
+                    maxLength={8}
+                    minLength={8}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Emargency contact</label>
+                  <input
+                    type="tel"
+                    name="emergency_contact"
+                    required
+                    value={newTenant.emargency_contact}
+                    onChange={handleInputChange}
+                    placeholder="e.g. +254712345678"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Target Property</label>
-                    <input
-                      type="text"
-                      name="property_name"
-                      required
-                      value={newTenant.property_name}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Kilimani Heights"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
-                    />
+                    <select
+    name="property"
+    value={newTenant.property}
+    onChange={handlePropertyChange}
+    required
+    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47]"
+>
+    <option value="">Select Property</option>
+
+    {properties.map((property) => (
+        <option key={property.id} value={property.id}>
+            {property.name}
+        </option>
+    ))}
+</select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Unit Assignment</label>
-                    <input
-                      type="text"
-                      name="unit_number"
-                      required
-                      value={newTenant.unit_number}
-                      onChange={handleInputChange}
-                      placeholder="e.g. A-12"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
-                    />
+                    <select
+    name="unit"
+    value={newTenant.unit}
+    onChange={handleInputChange}
+    required
+    disabled={!newTenant.property}
+    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47]"
+>
+    <option value="">
+        {newTenant.property ? "Select Unit" : "Select Property First"}
+    </option>
+
+    {units.map((unit) => (
+        <option key={unit.id} value={unit.id}>
+            {unit.name}
+        </option>
+    ))}
+</select>
                   </div>
                 </div>
 

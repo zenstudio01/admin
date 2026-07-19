@@ -93,6 +93,8 @@ formData.append("location", newProperty.location);
 formData.append("total_units", newProperty.total_units);
 formData.append("property_type", newProperty.property_type);
 formData.append("description", newProperty.description);
+formData.append("rent", newProperty.rent);
+formData.append("deposit", newProperty.deposit);
 
 selectedImages.forEach((image) => {
   formData.append("images", image);
@@ -335,6 +337,31 @@ const response = await api.post(
                       <option value="Mixed Use">Mixed Use</option>
                     </select>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Rent per month</label>
+                  <input
+                    type="number"
+                    name="rent"
+                    required
+                    value={newProperty.rent}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 15000"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Deposit</label>
+                  <input
+                    type="number"
+                    name="deposit"
+                    required
+                    value={newProperty.deposit}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 7500"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition"
+                  />
                 </div>
 
                 <div>

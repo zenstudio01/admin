@@ -37,7 +37,7 @@ const Signup = () => {
   // Swapped out TENANT variant for Equipment Supplier architecture mapping
   const roles = [
     { value: 'property manager', label: 'Property Manager', icon: Building2 },
-    { value: 'landlord', label: 'Landlord', icon: Users },
+    { value: 'company admin', label: 'Company Admin', icon: Users },
     { value: 'equipment supplier', label: 'Equipment Supplier', icon: Truck },
     { value: 'service provider', label: 'Service Provider / Fundi', icon: Briefcase },
     { value: 'store owner', label: 'Store Owner', icon: Store },
@@ -88,9 +88,19 @@ const Signup = () => {
           navigate('/signin');
         }, 1500);
       } else {
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: data.message || 'Failed to create account. Please try again.',
+        });
         setMessage({ type: 'error', text: data.message || 'Registration failed. Please check your details.' });
       }
     } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Network Error",
+        text: "Unable to connect to the server. Please check your internet connection.",
+      });
       setMessage({ type: 'error', text: 'Unable to connect to the server. Please try again later.' });
     } finally {
       setIsLoading(false);
@@ -109,12 +119,15 @@ const Signup = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#2E9D47]/10 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
           
           <div className="z-10">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 border-2 border-[#2E9D47] rounded-lg flex items-center justify-center font-bold text-xl text-[#2E9D47]">
-                U
-              </div>
-              <span className="text-xl font-bold tracking-wider text-white">UNIT</span>
-            </div>
+            <div className="flex justify-center mb-6">
+  <div className="bg-white p-3 rounded-full shadow-lg border border-gray-200">
+    <img
+      src="/unit_logo.png" // Update with your logo path
+      alt="UNIT Logo"
+      className="w-16 h-16 object-contain rounded-full"
+    />
+  </div>
+</div>
             <h2 className="text-2xl font-bold leading-tight mb-2">The Operating System for Property Managers</h2>
             <p className="text-sm text-[#F4F1E6]/70">Streamline your portfolio, access verified service providers, and automate payouts in one place.</p>
           </div>

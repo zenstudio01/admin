@@ -145,9 +145,11 @@ formData.append(
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Loading...
+      <Layout>
+      <div className="flex justify-center py-20">
+        <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
       </div>
+      </Layout>
     );
   }
 

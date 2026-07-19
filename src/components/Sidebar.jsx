@@ -14,6 +14,7 @@ import {
   BadgeCheck,
   UserCheck,
   ShoppingBasket,
+  TrendingUp,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -30,13 +31,19 @@ export default function Sidebar() {
       name: "Dashboard",
       path: "/dashboard",
       icon: <FaHome />,
-      roles: ["property manager", "landlord", "TENANT", "SERVICE_PROVIDER"],
+      roles: ["property manager", "TENANT", "SERVICE_PROVIDER"],
     },
     {
       name: "Dashboard",
       path: "/admin-dashboard",
       icon: <FaHome />,
       roles: ["admin"],
+    },
+    {
+      name: "Dashboard",
+      path: "/landlord-dashboard",
+      icon: <FaHome />,
+      roles: ["landlord"],
     },
     {
       name: "Users",
@@ -48,13 +55,19 @@ export default function Sidebar() {
       name: "Properties",
       path: "/properties",
       icon: <FaBuilding />,
-      roles: ["admin", "property manager", "landlord"],
+      roles: ["admin", "property manager"],
     },
     {
       name: "Tenants",
       path: "/tenants",
       icon: <FaUsers />,
       roles: ["property manager", "landlord"],
+    },
+    {
+      name: "Analytics",
+      path: "/landlord-analytics",
+      icon: <TrendingUp />,
+      roles: ["landlord"],
     },
     {
       name: "Landlords",
@@ -72,13 +85,13 @@ export default function Sidebar() {
       name: "Finances",
       path: "/finances",
       icon: <FaClipboardList />,
-      roles: ["admin", "property manager", "landlord"],
+      roles: ["admin"],
     },
     {
       name: "Professional Services",
       path: "/professional-services",
       icon: <UserCheck />,
-      roles: ["admin", "property manager", "SERVICE_PROVIDER"],
+      roles: ["admin", "SERVICE_PROVIDER"],
     },
     {
       name: "Compliance",
@@ -90,7 +103,7 @@ export default function Sidebar() {
       name: "Maintenance Store",
       path: "/maintenance-store",
       icon: <Store />,
-      roles: ["admin", "property manager", "landlord", "TENANT"],
+      roles: ["admin", "TENANT"],
     },
     {
       name: "Units",
@@ -127,6 +140,12 @@ export default function Sidebar() {
       path: "/admin-settings",
       icon: <Settings />,
       roles: ["admin"],
+    },
+    {
+      name: "Profile",
+      path: "/property-manager-profile",
+      icon: <FaUsers />,
+      roles: ["property manager"],
     },
     {
       name: "Subscription Packages",

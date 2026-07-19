@@ -8,6 +8,17 @@ import {
   FaCheckCircle,
   FaMapMarkerAlt
 } from "react-icons/fa";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Area,
+  AreaChart,
+} from "recharts";
 import Layout from "../layouts/Layout";
 import api from "../api/api"; // Adjust this relative path to match your API helper module
 
@@ -230,20 +241,53 @@ export default function Dashboard() {
 
             {/* Bottom Section: Revenue Tracking Blocks */}
             <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6 mt-8">
-              <h3 className="text-lg font-bold text-[#0A4429] mb-1">
-                Historical Monthly Collection Timeline
-              </h3>
-              <p className="text-xs text-gray-400 mb-6">Gross programmatic collections registry log.</p>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                {dashboardData.revenue_graph.map((data, idx) => (
-                  <div key={idx} className="bg-gray-50/50 border border-gray-100 rounded-xl p-3 text-center">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{data.month}</span>
-                    <p className="text-sm font-extrabold text-[#0A4429] mt-1">KES {data.revenue.toLocaleString()}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+  <h3 className="text-lg font-bold text-[#0A4429]">
+    Monthly Revenue Trend
+  </h3>
+
+  <p className="text-sm text-gray-500 mb-6">
+    Revenue collected over the last months.
+  </p>
+
+  <div className="h-80">
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={dashboardData.revenue_graph}>
+        <defs>
+          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#2E9D47" stopOpacity={0.35} />
+            <stop offset="95%" stopColor="#2E9D47" stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
+
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+
+        <XAxis
+          dataKey="month"
+          tick={{ fontSize: 12 }}
+        />
+
+        <YAxis
+          tickFormatter={(value) => `${value / 1000}K`}
+        />
+
+        <Tooltip
+          formatter={(value) => [
+            `KES ${Number(value).toLocaleString()}`,
+            "Revenue",
+          ]}
+        />
+
+        <Area
+          type="monotone"
+          dataKey="revenue"
+          stroke="#2E9D47"
+          strokeWidth={3}
+          fill="url(#colorRevenue)"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  </div>
+</div>
           </>
         )}
       </div>

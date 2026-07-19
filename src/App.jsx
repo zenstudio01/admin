@@ -28,6 +28,12 @@ import StoreProfile from './pages/store-owner/StoreProfile';
 
 import Units from './pages/propert-manager/Units';
 
+import PMProfile from './pages/propert-manager/PMProfile';
+
+
+import LandlordDashboard from './pages/landlord/LandlordDashboard';
+import LandlordAnalytics from './pages/landlord/Analytics';
+
 
 
 import Home from './pages/Home';
@@ -67,6 +73,10 @@ function App() {
 
         {/* property manager units route */}
         <Route path="/property-manager-unit" element={<Units />} />
+        <Route path="/property-manager-profile" element={<PMProfile />} />
+
+        <Route path="/landlord-dashboard" element={<LandlordDashboard />} />
+        <Route path="/landlord-analytics" element={<LandlordAnalytics />} />
       </Routes>
       {/* </Layout> */}
     </Router>
