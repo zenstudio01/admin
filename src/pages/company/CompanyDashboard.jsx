@@ -244,9 +244,7 @@ if (loading) {
         <div>
 
             <p className="text-gray-500 text-sm">
-
                 Wallet Balance
-
             </p>
 
             <h2 className="text-3xl font-bold mt-3 text-[#0A4429]">
