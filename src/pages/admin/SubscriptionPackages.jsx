@@ -68,7 +68,7 @@ export default function SubscriptionPackages() {
     
     Swal.fire({
       title: "Triggering M-Pesa STK Push",
-      text: `Sending instant KES ${billableAmount.toLocaleString()} payment request prompt to network line +${formattedPhone}...`,
+      text: `Sending instant Ksh ${billableAmount.toLocaleString()} payment request prompt to network line +${formattedPhone}...`,
       icon: "info",
       allowOutsideClick: false,
       didOpen: () => {
@@ -99,7 +99,7 @@ export default function SubscriptionPackages() {
         ? selectedPlan.monthly_price
         : selectedPlan.yearly_price) * 100,
 
-    currency: "KES",
+    currency: "Ksh",
 
     ref: "UNIT-" + Date.now(),
 
@@ -179,7 +179,7 @@ const verifyPayment = async (reference) => {
 
         {/* Pricing Cards Structural Rendering Grid */}
         {loading ? (
-          <div className="text-center py-12 font-medium text-gray-500 text-sm">Loading package infrastructure...</div>
+          <div className="text-center py-12 font-medium text-gray-500 text-sm">Loading packages...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
             {packages.map((plan, index) => {

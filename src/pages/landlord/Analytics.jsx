@@ -292,7 +292,7 @@ return(
                 </p>
 
                 <h2 className="text-3xl font-bold text-[#0A4429] mt-3">
-                    KES {(analytics.summary?.total_revenue || 0).toLocaleString()}
+                    Ksh {(analytics.summary?.total_revenue || 0).toLocaleString()}
                 </h2>
 
             </div>
@@ -338,7 +338,7 @@ return(
 
                 <h2 className="text-3xl font-bold text-[#0A4429] mt-3">
 
-                    KES {(analytics.summary?.pending_rent || 0).toLocaleString()}
+                    Ksh {(analytics.summary?.pending_rent || 0).toLocaleString()}
 
                 </h2>
 

@@ -31,7 +31,7 @@ export default function Sidebar() {
       name: "Dashboard",
       path: "/dashboard",
       icon: <FaHome />,
-      roles: ["property manager", "TENANT", "SERVICE_PROVIDER"],
+      roles: ["TENANT", "SERVICE_PROVIDER"],
     },
     {
       name: "Dashboard",
@@ -41,15 +41,39 @@ export default function Sidebar() {
     },
     {
       name: "Dashboard",
+      path: "/property-manager-dashboard",
+      icon: <FaHome />,
+      roles: ["property manager"],
+    },
+    {
+      name: "Dashboard",
       path: "/landlord-dashboard",
       icon: <FaHome />,
       roles: ["landlord"],
+    },
+    {
+      name: "Dashboard",
+      path: "/company-dashboard",
+      icon: <FaHome />,
+      roles: ["company admin"],
+    },
+    {
+      name: "Professionals",
+      path: "/company-professionals",
+      icon: <UserCheck />,
+      roles: ["company admin"],
     },
     {
       name: "Users",
       path: "/user-management",
       icon: <FaUsers />,
       roles: ["admin"],
+    },
+    {
+      name: "Profile",
+      path: "/company-profile",
+      icon: <FaUsers />,
+      roles: ["company admin"],
     },
     {
       name: "Properties",

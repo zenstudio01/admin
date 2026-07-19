@@ -19,10 +19,10 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import Layout from "../layouts/Layout";
-import api from "../api/api"; // Adjust this relative path to match your API helper module
+import Layout from "../../layouts/Layout";
+import api from "../../api/api"; // Adjust this relative path to match your API helper module
 
-export default function Dashboard() {
+export default function PMDashboard() {
   const [userName, setUserName] = useState("Property Manager");
   const [loading, setLoading] = useState(true);
   

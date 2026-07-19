@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // import Layout from './Components/Layout';
 import Signin from './pages/Signin';
-import Dashboard from './pages/Dashboard';
 import Properties from './pages/propert-manager/Properties';
 import Tenants from './pages/propert-manager/Tenants';
 import Index from './pages/Index';
@@ -29,10 +28,15 @@ import StoreProfile from './pages/store-owner/StoreProfile';
 import Units from './pages/propert-manager/Units';
 
 import PMProfile from './pages/propert-manager/PMProfile';
+import PMDashboard from './pages/propert-manager/PMDashboard';
 
 
 import LandlordDashboard from './pages/landlord/LandlordDashboard';
 import LandlordAnalytics from './pages/landlord/Analytics';
+
+import CompanyDashboard from './pages/company/CompanyDashboard';
+import CompanyProfile from './pages/company/CompanyProfile';
+import CompanyProfessionals from './pages/company/CompanyProfessional';
 
 
 
@@ -50,7 +54,6 @@ function App() {
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/tenants" element={<Tenants />} />
         <Route path="/landlords" element={<Landlords />} />
@@ -74,9 +77,15 @@ function App() {
         {/* property manager units route */}
         <Route path="/property-manager-unit" element={<Units />} />
         <Route path="/property-manager-profile" element={<PMProfile />} />
+        <Route path="/property-manager-dashboard" element={<PMDashboard />} />
 
         <Route path="/landlord-dashboard" element={<LandlordDashboard />} />
         <Route path="/landlord-analytics" element={<LandlordAnalytics />} />
+
+        {/* company routes */}
+        <Route path="/company-dashboard" element={<CompanyDashboard />} />
+        <Route path="/company-profile" element={<CompanyProfile />} />
+        <Route path="/company-professionals" element={<CompanyProfessionals />} />
       </Routes>
       {/* </Layout> */}
     </Router>

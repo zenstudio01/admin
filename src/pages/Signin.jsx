@@ -70,10 +70,10 @@ export default function Signin() {
         showConfirmButton: false,
       });
 
-      if(data.user.role === "property_manager"){
-        navigate("/dashboard");
-      }else if(data.user.role === "store owner"){
-        navigate("/store-owner-dashboard");
+      if(data.user.role === "property manager"){
+        navigate("/property-manager-dashboard");
+      }else if(data.user.role === "company admin"){
+        navigate("/company-dashboard");
       }else if(data.user.role === "landlord"){
         navigate("/landlord-dashboard");
       }

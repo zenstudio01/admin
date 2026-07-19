@@ -13,10 +13,19 @@ export default function Index() {
         const loggedIn = await bootstrapAuth();
 
         if (loggedIn) {
+          const storedUser = localStorage.getItem("user");
+         const user = storedUser ? JSON.parse(storedUser) : null;
           console.log("Session found");
-          navigate("/dashboard", {
-            replace: true,
-          });
+          if(data.user.role === "property_manager"){
+        navigate("/property-manager-dashboard");
+      }else if(data.user.role === "company admin"){
+        navigate("/company-dashboard");
+      }else if(data.user.role === "landlord"){
+        navigate("/landlord-dashboard");
+      }
+      else{
+        navigate("/dashboard");
+      }
         } else {
           console.log("No session found");
           navigate("/signin", {
