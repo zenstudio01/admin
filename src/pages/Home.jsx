@@ -59,7 +59,6 @@ export default function Home() {
       
       {/* NAVIGATION HEADER */}
       <HomeHeader/>
-      
 
       {/* 1. HERO SECTION & 2. PREMIUM SEARCH INTEGRATION */}
       <section id="home" className="relative pt-8 pb-16 lg:py-24 overflow-hidden border-b border-slate-100">
