@@ -15,9 +15,11 @@ import {
   UserCheck,
   ShoppingBasket,
   TrendingUp,
+  Bell,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
+
 
 export default function Sidebar() {
   const storedUser = localStorage.getItem("user");
@@ -103,7 +105,7 @@ export default function Sidebar() {
       name: "Maintenance",
       path: "/maintenance",
       icon: <FaTools />,
-      roles: ["admin"],
+      roles: ["property manager"],
     },
     {
       name: "Finances",
@@ -169,6 +171,12 @@ export default function Sidebar() {
       name: "Profile",
       path: "/property-manager-profile",
       icon: <FaUsers />,
+      roles: ["property manager"],
+    },
+    {
+      name: "Announcements",
+      path: "/property-manager-announcements",
+      icon: <Bell />,
       roles: ["property manager"],
     },
     {

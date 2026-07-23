@@ -10,10 +10,12 @@ import {
   Briefcase, 
   X,
   Phone,
-  ShieldAlert
+  ShieldAlert,
+  RefreshCw 
 } from "lucide-react";
 import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
+import api from '../../api/api';
 
 export default function Maintenance() {
   const [requests, setRequests] = useState([]);
@@ -22,65 +24,109 @@ export default function Maintenance() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPriority, setFilterPriority] = useState("All");
+  const [availableWorkers, setAvailableWorkers] = useState([]);
 
-  // Mock list of available localized service providers/workers from the marketplace network
-  const availableWorkers = [
-    { id: 101, name: "Fundi Kakamega Plumbers", category: "Plumbing", rating: "4.8", phone: "+254711223344", type: "Organization" },
-    { id: 102, name: "Juma Electricals", category: "Electrical", rating: "4.9", phone: "+254722556677", type: "Individual Specialist" },
-    { id: 103, name: "Nairobi Paint & Masonry Ltd", category: "Masonry/Painting", rating: "4.6", phone: "+254733889900", type: "Organization" },
-  ];
+
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+const [selectedStatusRequest, setSelectedStatusRequest] = useState(null);
+const [status, setStatus] = useState("");
 
   useEffect(() => {
     fetchMaintenanceRequests();
+    fetchProfessionals();
   }, []);
 
-  const fetchMaintenanceRequests = async () => {
-    try {
-      setLoading(true);
-      
-      // Seed data representing active structural reports inside pilot buildings
-      const fallbackRequests = [
-        { id: 1, title: "Main Water Line Burst", property: "Kilimani Heights", unit: "Block B Area", reportedBy: "Dr. Kobia (Landlord)", priority: "Emergency", status: "Open", description: "Water leaking heavily from the ceiling joints, risking lower unit flooding." },
-        { id: 2, title: "Elevator Power Tripping", property: "The Westlands Hub", unit: "Main Elevator Shaft", reportedBy: "Nairobi Corporate Holdings", priority: "High", status: "Open", description: "Breaker switch trips repeatedly during peak operation hours." },
-        { id: 3, title: "Balcony Railing Loose", property: "Kilimani Heights", unit: "Unit A-12", reportedBy: "Alex Njuguna (Tenant)", priority: "Medium", status: "Assigned", assignedTo: "Nairobi Paint & Masonry Ltd", description: "Rust has structurally compromised the anchoring bolts on the external balcony frame." },
-      ];
+ const fetchMaintenanceRequests = async () => {
+  try {
+    setLoading(true);
 
-      setRequests(fallbackRequests);
-    } catch (error) {
-      console.error("Error loading maintenance streams", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const response = await api.get("/property_manager_maintenance_requests/");
+
+    setRequests(response.data.requests);
+
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const fetchProfessionals = async () => {
+  try {
+    const response = await api.get("/get_company_professionals/");
+    setAvailableWorkers(response.data.professionals);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const handleOpenDispatch = (request) => {
     setSelectedRequest(request);
     setIsModalOpen(true);
   };
 
-  const handleAssignWorker = (worker) => {
-    // Dynamically map assigned entity data back into memory state tracking arrays
-    const updatedRequests = requests.map(req => {
-      if (req.id === selectedRequest.id) {
-        return { 
-          ...req, 
-          status: "Assigned", 
-          assignedTo: worker.name 
-        };
+  const handleAssignWorker = async (worker) => {
+  try {
+    await api.put(
+      `/assign_professional/${selectedRequest.id}/`,
+      {
+        professional_id: worker.id,
       }
-      return req;
-    });
-
-    setRequests(updatedRequests);
-    setIsModalOpen(false);
+    );
 
     Swal.fire({
       icon: "success",
-      title: "Service Worker Dispatched",
-      text: `${worker.name} has been assigned to resolve the "${selectedRequest.title}" request.`,
-      confirmButtonColor: "#2E9D47",
+      title: "Professional Assigned",
+      text: `${worker.name} has been assigned.`,
     });
-  };
+
+    setIsModalOpen(false);
+
+    fetchMaintenanceRequests();
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+const openStatusModal = (request) => {
+  setSelectedStatusRequest(request);
+  setStatus(request.status);
+  setStatusModalOpen(true);
+};
+
+
+const updateMaintenanceStatus = async () => {
+  try {
+    await api.put(
+      `/update_maintenance_status/${selectedStatusRequest.id}/`,
+      {
+        status,
+      }
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Updated",
+      text: "Maintenance status updated successfully.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+
+    setStatusModalOpen(false);
+
+    fetchMaintenanceRequests(); // reload your list
+  } catch (error) {
+    console.log(error);
+
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to update status.",
+    });
+  }
+};
 
   const filteredRequests = requests.filter(r => {
     const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -178,25 +224,44 @@ export default function Maintenance() {
                 </div>
 
                 {/* Tracking Assignments / Interaction Nodes */}
-                <div className="flex items-center gap-4 border-t lg:border-t-0 pt-4 lg:pt-0 border-gray-50 justify-between lg:justify-end min-w-[240px]">
-                  {request.status === "Assigned" ? (
-                    <div className="flex items-center gap-2 bg-gray-50 border border-gray-100 px-4 py-2.5 rounded-xl w-full lg:w-auto">
-                      <CheckCircle size={16} className="text-[#2E9D47]" />
-                      <div className="text-left">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Assigned Provider</p>
-                        <p className="text-xs font-bold text-[#0A4429]">{request.assignedTo}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleOpenDispatch(request)}
-                      className="flex items-center justify-center gap-2 bg-[#0A4429] hover:bg-[#2E9D47] text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm w-full lg:w-auto"
-                    >
-                      <UserPlus size={14} />
-                      <span>Dispatch Marketplace Fundi</span>
-                    </button>
-                  )}
-                </div>
+                <div className="border-t lg:border-t-0 pt-4 lg:pt-0 border-gray-50 min-w-[260px]">
+
+  {request.status === "Assigned" ? (
+    <div className="flex items-center gap-2 bg-gray-50 border border-gray-100 px-4 py-2.5 rounded-xl">
+      <CheckCircle size={16} className="text-[#2E9D47]" />
+
+      <div>
+        <p className="text-[10px] text-gray-400 uppercase font-bold">
+          Assigned Fundi
+        </p>
+
+        <p className="text-xs font-bold text-[#0A4429]">
+          {request.assignedTo}
+        </p>
+      </div>
+    </div>
+  ) : (
+    <button
+      onClick={() => handleOpenDispatch(request)}
+      className="w-full flex items-center justify-center gap-2 bg-[#0A4429] hover:bg-[#2E9D47] text-white py-2.5 rounded-xl text-xs font-semibold transition"
+    >
+      <UserPlus size={14} />
+      Assign Marketplace Fundi
+    </button>
+  )}
+
+  {/* Update Status Button */}
+
+  <button
+    onClick={() => openStatusModal(request)}
+    className="w-full mt-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-semibold transition"
+  >
+    <RefreshCw size={14} />
+    Update Status
+  </button>
+
+</div>
+                
               </div>
             ))}
           </div>
@@ -267,6 +332,49 @@ export default function Maintenance() {
         )}
 
       </div>
+
+
+      {statusModalOpen && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+
+      <h2 className="text-xl font-bold text-[#0A4429] mb-5">
+        Update Maintenance Status
+      </h2>
+
+      <select
+        value={status}
+        onChange={(e) => setStatus(e.target.value)}
+        className="w-full border rounded-xl px-4 py-3"
+      >
+        <option value="pending">Pending</option>
+        <option value="assigned">Assigned</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+
+      <div className="flex gap-3 mt-6">
+
+        <button
+          onClick={() => setStatusModalOpen(false)}
+          className="flex-1 border py-3 rounded-xl"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={updateMaintenanceStatus}
+          className="flex-1 bg-[#0A4429] text-white py-3 rounded-xl"
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </Layout>
   );
 }

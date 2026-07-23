@@ -12,10 +12,10 @@ import {
 import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
 import api from "../../api/api";
+import PaystackPop from "@paystack/inline-js";
 
 export default function SubscriptionPackages() {
   const [billingCycle, setBillingCycle] = useState("monthly"); // monthly or yearly
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,88 +42,36 @@ export default function SubscriptionPackages() {
     setIsCheckoutOpen(true);
   };
 
-  const handleMpesaStkPush = (e) => {
-    e.preventDefault();
-    
-    let formattedPhone = phoneNumber.trim().replace(/\s+/g, "");
-    if (formattedPhone.startsWith("0")) {
-      formattedPhone = "254" + formattedPhone.substring(1);
-    } else if (formattedPhone.startsWith("+")) {
-      formattedPhone = formattedPhone.substring(1);
-    }
 
-    if (!/^254(7|1)\d{8}$/.test(formattedPhone)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Target Vector",
-        text: "Please supply a valid Kenyan Safaricom phone number (e.g., 07XXXXXXXX or 254XXXXXXXX).",
-        confirmButtonColor: "#d33"
-      });
-      return;
-    }
-
-    const billableAmount = billingCycle === "monthly" ? selectedPlan.monthly_price : selectedPlan.yearly_price;
+const payWithPaystack = async () => {
+  try {
+    setLoading(true);
 
     setIsCheckoutOpen(false);
-    
-    Swal.fire({
-      title: "Triggering M-Pesa STK Push",
-      text: `Sending instant Ksh ${billableAmount.toLocaleString()} payment request prompt to network line +${formattedPhone}...`,
-      icon: "info",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
 
-    setTimeout(() => {
-      Swal.close();
-      Swal.fire({
-        icon: "success",
-        title: "Payment Verified",
-        text: `Welcome to the ${selectedPlan.name}! Your system architecture capabilities have been instantly upgraded.`,
-        confirmButtonColor: "#2E9D47"
-      });
-      setPhoneNumber("");
-    }, 4000);
-  };
+    const storedUser = localStorage.getItem("user");
+    const user = storedUser ? JSON.parse(storedUser) : null;
 
-  const payWithPaystack = () => {
-  const handler = window.PaystackPop.setup({
-    key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-
-    email: user.email,
-
-    amount:
-      (billingCycle === "monthly"
-        ? selectedPlan.monthly_price
-        : selectedPlan.yearly_price) * 100,
-
-    currency: "Ksh",
-
-    ref: "UNIT-" + Date.now(),
-
-    metadata: {
+    const response = await api.post("/property_manager_subscribe_plan/", {
+      email: user.user_email,
       package_id: selectedPlan.id,
       billing_cycle: billingCycle,
-    },
-
-    callback: function (response) {
-      verifyPayment(response.reference);
-    },
-
-    onClose: function () {
-      console.log("Payment cancelled");
-    },
-  });
-
-  handler.openIframe();
-};
-
-const verifyPayment = async (reference) => {
-    await api.post("/verify_paystack_payment/", {
-        reference,
     });
+
+    window.location.href = response.data.authorization_url;
+  } catch (error) {
+    console.log(error.response?.data);
+
+    Swal.fire({
+      icon: "error",
+      title: "Payment Failed",
+      text:
+        error.response?.data?.message ||
+        "Unable to initialize payment.",
+    });
+  } finally {
+    setLoading(false);
+  }
 };
 
   // Safe mapping configuration for visual indicators based on plan items
@@ -179,7 +127,9 @@ const verifyPayment = async (reference) => {
 
         {/* Pricing Cards Structural Rendering Grid */}
         {loading ? (
-          <div className="text-center py-12 font-medium text-gray-500 text-sm">Loading packages...</div>
+          <div className="flex justify-center py-20">
+            <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
             {packages.map((plan, index) => {
@@ -257,64 +207,58 @@ const verifyPayment = async (reference) => {
 
         {/* Dynamic M-Pesa STK Push Integration Modal */}
         {isCheckoutOpen && selectedPlan && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-150">
-              
-              <div className="p-5 bg-[#0A4429] text-white flex justify-between items-center">
-                <div>
-                  <h3 className="text-base font-bold">Secure Gateway Checkout</h3>
-                  <p className="text-[11px] text-[#F4F1E6]/70 mt-0.5">Direct Daraja API node verification protocols.</p>
-                </div>
-                <button 
-                  onClick={() => setIsCheckoutOpen(false)} 
-                  className="p-1 hover:bg-white/10 rounded-lg text-white text-xs font-medium"
-                >
-                  Close
-                </button>
-              </div>
+          <div className="p-5">
 
-              <div className="p-4 bg-gray-50 border-b border-gray-100 text-xs flex justify-between items-center">
-                <div>
-                  <p className="font-semibold text-gray-700">{selectedPlan.name} Setup</p>
-                  <p className="text-gray-400 mt-0.5">Billing Terms: Cycle variant ({billingCycle})</p>
-                </div>
-                <p className="text-base font-black text-[#0A4429]">
-                  Ksh {(billingCycle === "monthly" ? selectedPlan.monthly_price : selectedPlan.yearly_price).toLocaleString()}
-                </p>
-              </div>
+  <div className="bg-gray-50 rounded-xl p-5">
 
-              <form onSubmit={handleMpesaStkPush} className="p-5 space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 flex items-center gap-1">
-                    <Smartphone size={14} className="text-[#2E9D47]" /> Safaricom Payment Line
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="e.g. 0712345678 or 254712345678"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm font-mono tracking-wide"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    An STK push popup verification check request framework will fire on this device path instantly.
-                  </p>
-                </div>
+    <h3 className="text-xl font-bold text-[#0A4429]">
+      {selectedPlan.name}
+    </h3>
 
-                <div className="p-3 bg-green-50/50 border border-green-100 rounded-xl text-[10px] text-green-800 flex gap-2">
-                  <ShieldCheck size={16} className="shrink-0 mt-0.5" />
-                  <p>Encrypted network loop channels verify transmission parameters. Subscriptions initialize exactly when webhooks settle successfully inside the ledger registries.</p>
-                </div>
+    <p className="text-gray-500 mt-2">
+      {billingCycle === "monthly"
+        ? "Monthly Subscription"
+        : "Yearly Subscription"}
+    </p>
 
-                <button
-                  type="submit"
-                  className="w-full bg-[#2E9D47] hover:bg-[#0A4429] text-white font-bold py-3 rounded-xl text-xs shadow-sm flex items-center justify-center gap-1.5 tracking-wide uppercase transition-colors"
-                >
-                  <CreditCard size={14} /> Request Authorization Pin Prompt
-                </button>
-              </form>
-            </div>
-          </div>
+    <div className="border-t mt-5 pt-5 space-y-3">
+
+      <div className="flex justify-between">
+        <span className="text-gray-500">
+          Billing Cycle
+        </span>
+
+        <span className="font-semibold capitalize">
+          {billingCycle}
+        </span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="text-gray-500">
+          Amount
+        </span>
+
+        <span className="font-bold text-2xl text-[#0A4429]">
+          KES{" "}
+          {billingCycle === "monthly"
+            ? selectedPlan.monthly_price.toLocaleString()
+            : selectedPlan.yearly_price.toLocaleString()}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <button
+    onClick={payWithPaystack}
+    disabled={loading}
+    className="mt-6 w-full bg-[#0A4429] hover:bg-[#2E9D47] text-white rounded-xl py-4 font-bold transition"
+  >
+    {loading ? "Redirecting..." : "Continue to Paystack"}
+  </button>
+
+</div>
         )}
 
       </div>

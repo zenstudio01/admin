@@ -29,6 +29,8 @@ import Units from './pages/propert-manager/Units';
 
 import PMProfile from './pages/propert-manager/PMProfile';
 import PMDashboard from './pages/propert-manager/PMDashboard';
+import Announcements from './pages/propert-manager/Announcements';
+import PaymentSuccess from './pages/propert-manager/PayementSuccess';
 
 
 import LandlordDashboard from './pages/landlord/LandlordDashboard';
@@ -78,6 +80,8 @@ function App() {
         <Route path="/property-manager-unit" element={<Units />} />
         <Route path="/property-manager-profile" element={<PMProfile />} />
         <Route path="/property-manager-dashboard" element={<PMDashboard />} />
+        <Route path="/property-manager-announcements" element={<Announcements />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
         <Route path="/landlord-dashboard" element={<LandlordDashboard />} />
         <Route path="/landlord-analytics" element={<LandlordAnalytics />} />
