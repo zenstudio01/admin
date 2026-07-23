@@ -39,6 +39,9 @@ import LandlordAnalytics from './pages/landlord/Analytics';
 import CompanyDashboard from './pages/company/CompanyDashboard';
 import CompanyProfile from './pages/company/CompanyProfile';
 import CompanyProfessionals from './pages/company/CompanyProfessional';
+import CompanyServices from './pages/company/CompanyServices';
+import AddService from './pages/company/AddService';
+import EditService from './pages/company/EditService';
 
 
 
@@ -90,6 +93,9 @@ function App() {
         <Route path="/company-dashboard" element={<CompanyDashboard />} />
         <Route path="/company-profile" element={<CompanyProfile />} />
         <Route path="/company-professionals" element={<CompanyProfessionals />} />
+        <Route path="/company-services" element={<CompanyServices />} />
+        <Route path="/add-service" element={<AddService />} />
+        <Route path="/edit-service/:id" element={<EditService />} />
       </Routes>
       {/* </Layout> */}
     </Router>

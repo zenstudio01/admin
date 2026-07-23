@@ -78,6 +78,12 @@ export default function Sidebar() {
       roles: ["company admin"],
     },
     {
+      name: "Services",
+      path: "/company-services",
+      icon: <FaUsers />,
+      roles: ["company admin"],
+    },
+    {
       name: "Properties",
       path: "/properties",
       icon: <FaBuilding />,
