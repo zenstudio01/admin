@@ -42,6 +42,8 @@ import CompanyProfessionals from './pages/company/CompanyProfessional';
 import CompanyServices from './pages/company/CompanyServices';
 import AddService from './pages/company/AddService';
 import EditService from './pages/company/EditService';
+import AssignWorker from './pages/company/AssignWorker';
+import CompanyBookings from './pages/company/CompanyBookings';
 
 
 
@@ -96,6 +98,8 @@ function App() {
         <Route path="/company-services" element={<CompanyServices />} />
         <Route path="/add-service" element={<AddService />} />
         <Route path="/edit-service/:id" element={<EditService />} />
+        <Route path="/assign-worker/:bookingId" element={<AssignWorker />} />
+        <Route path="/company-bookings" element={<CompanyBookings />} />
       </Routes>
       {/* </Layout> */}
     </Router>

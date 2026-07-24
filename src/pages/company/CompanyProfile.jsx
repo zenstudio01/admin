@@ -14,14 +14,18 @@ import {
     Phone,
     Pencil
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function CompanyProfile() {
+    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
 
     const [company, setCompany] = useState(null);
 
     const [statistics, setStatistics] = useState({});
+
+    const [subscription, setSubscription] = useState(null);
 
     const [editing, setEditing] = useState(false);
 
@@ -56,6 +60,7 @@ export default function CompanyProfile() {
             setFormData(response.data.company);
 
             setStatistics(response.data.statistics);
+            setSubscription(response.data.subscription);
 
         } catch (error) {
 
@@ -606,6 +611,112 @@ const handleUpdate = async (e) => {
         </div>
 
     </div>
+
+</div>
+
+
+{/* Subscription Card */}
+
+<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-6">
+
+  <div className="flex justify-between items-start">
+
+    <div>
+
+      <p className="text-gray-500 text-sm">
+        Current Subscription
+      </p>
+
+      <h2 className="text-2xl font-black text-[#0A4429] mt-1 capitalize">
+        {subscription ? subscription.package.name : "No Active Plan"}
+      </h2>
+
+    </div>
+
+    <span
+      className={`px-4 py-2 rounded-full text-sm font-bold ${
+        subscription?.is_active
+          ? "bg-green-100 text-green-700"
+          : "bg-red-100 text-red-700"
+      }`}
+    >
+      {subscription?.is_active ? "ACTIVE" : "INACTIVE"}
+    </span>
+
+  </div>
+
+  <div className="grid grid-cols-2 gap-4 mt-8">
+
+    <div className="bg-gray-50 rounded-xl p-4">
+
+      <p className="text-xs text-gray-500">
+        Started On
+      </p>
+
+      <p className="font-bold text-[#0A4429] mt-1">
+        {subscription
+          ? new Date(subscription.start_date).toLocaleDateString()
+          : "--"}
+      </p>
+
+    </div>
+
+    <div className="bg-gray-50 rounded-xl p-4">
+
+      <p className="text-xs text-gray-500">
+        Expires On
+      </p>
+
+      <p className="font-bold text-[#0A4429] mt-1">
+        {subscription
+          ? new Date(subscription.end_date).toLocaleDateString()
+          : "--"}
+      </p>
+
+    </div>
+
+  </div>
+
+  <div className="grid grid-cols-2 gap-4 mt-4">
+
+    <div className="bg-gray-50 rounded-xl p-4">
+
+      <p className="text-xs text-gray-500">
+        Units Allowed
+      </p>
+
+      <p className="font-black text-xl text-[#2E9D47] mt-1">
+        {subscription.package.number_of_units ?? "--"}
+      </p>
+
+    </div>
+
+    <div className="bg-gray-50 rounded-xl p-4">
+
+      <p className="text-xs text-gray-500">
+        Days Remaining
+      </p>
+
+      <p className="font-black text-xl text-[#0A4429] mt-1">
+        {subscription?.days_remaining ?? 0}
+      </p>
+
+    </div>
+
+  </div>
+
+  <div className="mt-8">
+
+    <button
+      onClick={() => navigate("/subscription-packages")}
+      className="w-full bg-[#0A4429] hover:bg-[#2E9D47] text-white py-4 rounded-xl font-bold transition"
+    >
+      {subscription?.is_active
+        ? "Upgrade / Renew Subscription"
+        : "Activate Subscription"}
+    </button>
+
+  </div>
 
 </div>
 

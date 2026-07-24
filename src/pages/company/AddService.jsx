@@ -94,7 +94,7 @@ export default function AddService() {
         text: "Service added successfully.",
       });
 
-      navigate("/company/services");
+      navigate("/company-services");
 
     } catch (e) {
       console.log(e.response?.data);

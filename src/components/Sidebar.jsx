@@ -66,6 +66,12 @@ export default function Sidebar() {
       roles: ["company admin"],
     },
     {
+      name: "Bookings Requests",
+      path: "/company-bookings",
+      icon: <UserCheck />,
+      roles: ["company admin"],
+    },
+    {
       name: "Users",
       path: "/user-management",
       icon: <FaUsers />,
@@ -189,7 +195,7 @@ export default function Sidebar() {
       name: "Subscription Packages",
       path: "/subscription-packages",
       icon: <Package />,
-      roles: ["store owner","admin", "property manager"],
+      roles: ["store owner","admin", "company admin", "property manager"],
     },
   ];
 

@@ -38,7 +38,7 @@ export default function CompanyServices() {
     try {
       setLoading(true);
 
-      const response = await api.get("/get_company_services/");
+      const response = await api.get("/admin_get_company_services/");
 
       setServices(response.data.services);
       setFiltered(response.data.services);
