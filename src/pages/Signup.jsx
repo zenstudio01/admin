@@ -17,6 +17,7 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
 import { API_URL } from '../config/env';
+import Colors from '../constants/colors';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -25,16 +26,15 @@ const Signup = () => {
     email: '',
     phone_number: '',
     password: '',
-    confirmPassword: '', // Added tracking vector to state core
-    role: 'PM', 
+    confirmPassword: '',
+    role: 'property manager', 
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle state for the secondary input
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // Swapped out TENANT variant for Equipment Supplier architecture mapping
   const roles = [
     { value: 'property manager', label: 'Property Manager', icon: Building2 },
     { value: 'company admin', label: 'Company Admin', icon: Users },
@@ -53,7 +53,6 @@ const Signup = () => {
     setIsLoading(true);
     setMessage({ type: '', text: '' });
 
-    // Validation guard statement to confirm string equivalence before transmission
     if (formData.password !== formData.confirmPassword) {
       setMessage({ type: 'error', text: 'Passwords do not match. Please verify your entries.' });
       setIsLoading(false);
@@ -110,37 +109,43 @@ const Signup = () => {
   return (
     <div 
       className="min-h-screen flex items-center justify-center bg-cover bg-center p-4 font-sans"
-      style={{ backgroundImage: `url('/unit_uniform_background.png')` }}
+      style={{ 
+        backgroundImage: `url('/unit_uniform_background.png')`,
+        backgroundColor: Colors.background || '#FFFFFF',
+      }}
     >
-      <div className="bg-white/95 backdrop-blur-sm w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row border border-[#0A4429]/10">
+      <div className="bg-white/95 backdrop-blur-sm w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
         
         {/* Left Branding Panel */}
-        <div className="bg-[#0A4429] text-[#F4F1E6] p-8 md:w-5/12 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#2E9D47]/10 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
+        <div 
+          className="text-white p-8 md:w-5/12 flex flex-col justify-between relative overflow-hidden"
+          style={{ backgroundColor: Colors.primary }}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
           
           <div className="z-10">
             <div className="flex justify-center mb-6">
-  <div className="bg-white p-3 rounded-full shadow-lg border border-gray-200">
-    <img
-      src="/unit_logo.png" // Update with your logo path
-      alt="UNIT Logo"
-      className="w-16 h-16 object-contain rounded-full"
-    />
-  </div>
-</div>
+              <div className="bg-white p-3 rounded-full shadow-lg border border-gray-200">
+                <img
+                  src="/logo.png"
+                  alt="UNIT Logo"
+                  className="w-16 h-16 object-contain rounded-full"
+                />
+              </div>
+            </div>
             <h2 className="text-2xl font-bold leading-tight mb-2">The Operating System for Property Managers</h2>
-            <p className="text-sm text-[#F4F1E6]/70">Streamline your portfolio, access verified service providers, and automate payouts in one place.</p>
+            <p className="text-sm text-white/80">Streamline your portfolio, access verified service providers, and automate payouts in one place.</p>
           </div>
 
-          <div className="mt-8 md:mt-0 z-10 border-t border-[#F4F1E6]/10 pt-4">
-            <p className="text-xs text-[#F4F1E6]/50">© 2026 UNIT Proptech. All rights reserved.</p>
+          <div className="mt-8 md:mt-0 z-10 border-t border-white/10 pt-4">
+            <p className="text-xs text-white/60">© 2026 UNIT Proptech. All rights reserved.</p>
           </div>
         </div>
 
         {/* Right Form Panel */}
         <div className="p-8 md:w-7/12 flex flex-col justify-center bg-white">
           <div className="mb-6">
-            <h3 className="text-2xl font-bold text-[#0A4429]">Create your account</h3>
+            <h3 className="text-2xl font-bold text-slate-900">Create your account</h3>
             <p className="text-sm text-gray-500 mt-1">Get started by choosing your specific user role.</p>
           </div>
 
@@ -157,7 +162,7 @@ const Signup = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Role Picker Segmented Control Grid */}
             <div>
-              <label className="text-xs font-semibold text-[#0A4429] uppercase tracking-wider block mb-2">I am a:</label>
+              <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-2">I am a:</label>
               <div className="grid grid-cols-2 gap-2">
                 {roles.map((r) => {
                   const IconComponent = r.icon;
@@ -169,11 +174,16 @@ const Signup = () => {
                       onClick={() => setFormData(prev => ({ ...prev, role: r.value }))}
                       className={`flex items-center gap-2 p-2.5 rounded-lg border text-left text-xs transition-all duration-200 ${
                         isSelected 
-                          ? 'border-[#2E9D47] bg-[#2E9D47]/5 text-[#0A4429] font-semibold ring-1 ring-[#2E9D47]' 
+                          ? 'border-transparent font-semibold shadow-xs' 
                           : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                       }`}
+                      style={
+                        isSelected
+                          ? { backgroundColor: `${Colors.primary}15`, color: Colors.primary, borderColor: Colors.primary }
+                          : {}
+                      }
                     >
-                      <IconComponent size={16} className={isSelected ? 'text-[#2E9D47]' : 'text-gray-400'} />
+                      <IconComponent size={16} style={{ color: isSelected ? Colors.primary : '#9CA3AF' }} />
                       <span>{r.label}</span>
                     </button>
                   );
@@ -195,7 +205,7 @@ const Signup = () => {
                   value={formData.full_name}
                   onChange={handleInputChange}
                   placeholder="e.g. John Doe"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none text-sm transition-all focus:border-transparent"
                 />
               </div>
             </div>
@@ -214,7 +224,7 @@ const Signup = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="name@company.com"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none text-sm transition-all focus:border-transparent"
                 />
               </div>
             </div>
@@ -233,7 +243,7 @@ const Signup = () => {
                   value={formData.phone_number}
                   onChange={handleInputChange}
                   placeholder="e.g. +254712345678"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none text-sm transition-all focus:border-transparent"
                 />
               </div>
             </div>
@@ -252,7 +262,7 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg outline-none text-sm transition-all focus:border-transparent"
                 />
                 <button
                   type="button"
@@ -264,7 +274,7 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Explicit Confirm Password Element Injected Here */}
+            {/* Confirm Password Input */}
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-700 block">Confirm Password</label>
               <div className="relative">
@@ -278,7 +288,7 @@ const Signup = () => {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg outline-none text-sm transition-all focus:border-transparent"
                 />
                 <button
                   type="button"
@@ -294,20 +304,29 @@ const Signup = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#2E9D47]/90 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mt-2 text-sm"
+              className="w-full flex items-center justify-center gap-2 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-150 shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed mt-2 text-sm"
+              style={{ backgroundColor: Colors.primary }}
             >
               {isLoading ? (
                 <div className="flex justify-center">
                   <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              ) : "Register Account"}
-              {!isLoading && <ArrowRight size={16} />}
+              ) : (
+                <>
+                  <span>Register Account</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
 
             <div className="text-center mt-4 pt-2 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 Already have an account?{' '}
-                <a href="/signin" className="text-[#2E9D47] hover:text-[#0A4429] font-semibold transition-colors">
+                <a 
+                  href="/signin" 
+                  className="font-semibold transition-colors hover:underline"
+                  style={{ color: Colors.primary }}
+                >
                   Sign In
                 </a>
               </p>

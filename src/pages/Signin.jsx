@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { FaBuilding, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { API_URL } from "../config/env";
+import Colors from "../constants/colors";
 
 export default function Signin() {
   const navigate = useNavigate();
@@ -29,19 +29,15 @@ export default function Signin() {
     try {
       setLoading(true);
 
-      // Hit your Django authentication endpoint
-      const response = await fetch(
-        `${API_URL}/signin/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${API_URL}/signin/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-      if(response.status === 403){
+      if (response.status === 403) {
         Swal.fire({
           icon: "info",
           title: "Email Verification Required",
@@ -50,51 +46,44 @@ export default function Signin() {
         return;
       }
 
+      if (response.status === 200) {
+        const data = await response.json();
 
+        // Store auth tokens and user data securely
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
 
-      if(response.status == 200){
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Login successful",
+          timer: 1500,
+          showConfirmButton: false,
+        });
 
-      const data = await response.json();
-      // console.log("Data" + data.user.user_name);
-
-      // Store auth tokens and user data securely
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Login successful",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-
-      if(data.user.role === "property manager"){
-        navigate("/property-manager-dashboard");
-      }else if(data.user.role === "company admin"){
-        navigate("/company-dashboard");
-      }else if(data.user.role === "landlord"){
-        navigate("/landlord-dashboard");
+        if (data.user?.role === "property manager") {
+          navigate("/property-manager-dashboard");
+        } else if (data.user?.role === "company admin") {
+          navigate("/company-dashboard");
+        } else if (data.user?.role === "landlord") {
+          navigate("/landlord-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: "Invalid email or password",
+        });
       }
-      else{
-        navigate("/dashboard");
-      }
-
-    }else{
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: "Invalid email or password",
-      });
-
-    }
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
         text:
-          error.response?.data?.detail || 
+          error.response?.data?.detail ||
           error.response?.data?.message ||
           "Invalid email or password",
       });
@@ -104,23 +93,26 @@ export default function Signin() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
-      style={{ backgroundImage: `url('/unit_uniform_background.png')` }}
+      style={{
+        backgroundImage: `url('/unit_uniform_background.png')`,
+        backgroundColor: Colors.background || "#FFFFFF",
+      }}
     >
       <div className="w-full max-w-md">
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-[#0A4429]/10">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-slate-200">
           <div className="flex justify-center mb-6">
-  <div className="p-3 rounded-full shadow-lg border border-gray-200">
-    <img
-      src="/unit_logo.png" // Update with your logo path
-      alt="UNIT Logo"
-      className="w-16 h-16 object-contain rounded-full"
-    />
-  </div>
-</div>
+            <div className="p-3 rounded-full shadow-lg border border-gray-200">
+              <img
+                src="/logo.png"
+                alt="UNIT Logo"
+                className="w-16 h-16 object-contain rounded-full"
+              />
+            </div>
+          </div>
 
-          <h1 className="text-3xl font-bold text-center text-[#0A4429]">
+          <h1 className="text-3xl font-bold text-center text-slate-900">
             Welcome Back
           </h1>
 
@@ -141,7 +133,10 @@ export default function Signin() {
                 onChange={handleChange}
                 placeholder="Enter your email"
                 required
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none transition focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none transition focus:border-transparent text-sm"
+                style={{
+                  color: "#111827",
+                }}
               />
             </div>
 
@@ -158,7 +153,7 @@ export default function Signin() {
                   onChange={handleChange}
                   placeholder="Enter your password"
                   required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 outline-none transition focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 outline-none transition focus:border-transparent text-sm"
                 />
 
                 <button
@@ -171,44 +166,51 @@ export default function Signin() {
               </div>
             </div>
 
-            {/* Remember Me */}
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    className="accent-[#2E9D47]"
-                  />
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 cursor-pointer text-gray-600">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300"
+                  style={{ accentColor: Colors.primary }}
+                />
+                <span>Remember me</span>
+              </label>
 
-                  <span>Remember me</span>
-                </label>
+              <button
+                type="button"
+                className="font-medium hover:underline"
+                style={{ color: Colors.primary }}
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot Password?
+              </button>
+            </div>
 
-                <button
-                  type="button"
-                  className="text-[#2E9D47] hover:underline"
-                  onClick={() => navigate("/forgot-password")}
-                >
-                  Forgot Password?
-                </button>
-              </div>
-
-            {/* Main Action Button utilizing brand greens */}
+            {/* Action Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#2E9D47] hover:bg-[#0A4429] text-white py-3 rounded-lg font-semibold shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
+              className="w-full text-white py-3 rounded-lg font-semibold shadow-sm transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
+              style={{ backgroundColor: Colors.primary }}
             >
               {loading ? (
-                      <div className="flex justify-center">
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                     </div>
-                     ) : "Sign In"
-              }
+                <div className="flex justify-center">
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </button>
 
             <div className="text-center mt-6 pt-2 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 Don't have an account?{" "}
-                <a href="/signup" className="text-[#2E9D47] hover:text-[#0A4429] font-semibold transition-colors">
+                <a
+                  href="/signup"
+                  className="font-semibold transition-colors hover:underline"
+                  style={{ color: Colors.primary }}
+                >
                   Sign Up
                 </a>
               </p>

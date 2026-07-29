@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import {
   Search,
   BedDouble,
@@ -9,13 +8,14 @@ import {
   Building2,
   X,
   Save,
+  Plus
 } from "lucide-react";
 import api from "../../api/api";
 import Layout from "../../layouts/Layout";
-import ImageUploading from "react-images-uploading";
+import Colors from "../../constants/colors";
+import Swal from "sweetalert2";
 
 export default function Units() {
-
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [units, setUnits] = useState([]);
@@ -36,13 +36,17 @@ export default function Units() {
   const fetchUnits = async () => {
     try {
       setLoading(true);
-
       const res = await api.get(`/units/get_my_units/`);
-
-      setUnits(res.data.units);
-
+      setUnits(res.data.units || []);
     } catch (err) {
-      console.log(err);
+      console.error("Error fetching units:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Sync Error",
+        text: "Unable to retrieve unit records.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } finally {
       setLoading(false);
     }
@@ -50,573 +54,486 @@ export default function Units() {
 
   const filteredUnits = useMemo(() => {
     return units.filter((unit) => {
+      const unitName = unit.name || "";
+      const propertyName = unit.property_name || "";
 
       const searchMatch =
-        unit.name.toLowerCase().includes(search.toLowerCase()) ||
-        unit.property_name
-          .toLowerCase()
-          .includes(search.toLowerCase());
+        unitName.toLowerCase().includes(search.toLowerCase()) ||
+        propertyName.toLowerCase().includes(search.toLowerCase());
 
-      const filterMatch =
-        filter === "all" ||
-        unit.status === filter;
+      const filterMatch = filter === "all" || unit.status === filter;
 
       return searchMatch && filterMatch;
-
     });
   }, [units, search, filter]);
 
   const openEdit = (unit) => {
     setSelectedUnit({ ...unit });
+    setSelectedImages([]);
     setShowModal(true);
   };
 
   const handleImageChange = (e) => {
-  const files = Array.from(e.target.files);
-  setSelectedImages(files);
-};
+    const files = Array.from(e.target.files);
+    setSelectedImages(files);
+  };
 
-const addAmenity = () => {
-  if (!amenity.trim()) return;
+  const addAmenity = () => {
+    if (!amenity.trim()) return;
 
-  setSelectedUnit({
-    ...selectedUnit,
-    amenities: [
-      ...(selectedUnit.amenities || []),
-      amenity.trim(),
-    ],
-  });
+    setSelectedUnit((prev) => ({
+      ...prev,
+      amenities: [...(prev.amenities || []), amenity.trim()],
+    }));
 
-  setAmenity("");
-};
+    setAmenity("");
+  };
 
-const removeAmenity = (index) => {
-  setSelectedUnit({
-    ...selectedUnit,
-    amenities: selectedUnit.amenities.filter(
-      (_, i) => i !== index
-    ),
-  });
-};
+  const removeAmenity = (index) => {
+    setSelectedUnit((prev) => ({
+      ...prev,
+      amenities: (prev.amenities || []).filter((_, i) => i !== index),
+    }));
+  };
 
   const saveUnit = async () => {
     setIsSaving(true);
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    formData.append("name", selectedUnit.name);
-    formData.append("description", selectedUnit.description);
-    formData.append("price_per_month", selectedUnit.price_per_month);
-    formData.append("bedrooms", selectedUnit.bedrooms);
-    formData.append("bathrooms", selectedUnit.bathrooms);
-    formData.append("max_guests", selectedUnit.max_guests);
-    formData.append("status", selectedUnit.status);
+      formData.append("name", selectedUnit.name || "");
+      formData.append("description", selectedUnit.description || "");
+      formData.append("price_per_month", selectedUnit.price_per_month || 0);
+      formData.append("bedrooms", selectedUnit.bedrooms || 0);
+      formData.append("bathrooms", selectedUnit.bathrooms || 0);
+      formData.append("max_guests", selectedUnit.max_guests || 0);
+      formData.append("status", selectedUnit.status || "available");
 
-    // Upload new images
-    selectedImages.forEach((file) => {
-  formData.append("images", file);
-});
+      // Upload new images if present
+      selectedImages.forEach((file) => {
+        formData.append("images", file);
+      });
 
-// Add amenities
-formData.append(
-  "amenities",
-  JSON.stringify(selectedUnit.amenities)
-);
+      // Add amenities
+      formData.append(
+        "amenities",
+        JSON.stringify(selectedUnit.amenities || [])
+      );
 
-    await api.put(
-      `/units/update_unit/${selectedUnit.id}/`,
-      formData,
-      {
+      await api.put(`/units/update_unit/${selectedUnit.id}/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
-    );
+      });
 
-    setShowModal(false);
-    fetchUnits();
+      Swal.fire({
+        icon: "success",
+        title: "Unit Updated",
+        text: "Unit details have been successfully saved.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
 
-  } catch (err) {
-    console.log(err);
-  }finally{
-    setIsSaving(false);
-  }
-};
+      setShowModal(false);
+      fetchUnits();
+    } catch (err) {
+      console.error("Error saving unit:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Failed to update unit information. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (loading) {
     return (
       <Layout>
-      <div className="flex justify-center py-20">
-        <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
-      </div>
+        <div className="flex justify-center py-20 min-h-screen" style={{ backgroundColor: Colors.background || "#FFFFFF" }}>
+          <div 
+            className="h-8 w-8 border-4 border-t-transparent rounded-full animate-spin"
+            style={{ borderColor: `${Colors.primary} transparent transparent transparent` }}
+          ></div>
+        </div>
       </Layout>
     );
   }
 
   return (
     <Layout>
-    <div className="p-8">
-
-      <div className="flex justify-between items-center mb-8">
-
-        <div>
-
-          <h1 className="text-3xl font-bold">
-            My Units
-          </h1>
-
-          <p className="text-gray-500 mt-1">
-            Manage all rental units.
-          </p>
-
+      <div 
+        className="p-4 md:p-8 min-h-screen font-sans"
+        style={{ backgroundColor: Colors.background || "#FFFFFF" }}
+      >
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">My Units</h1>
+            <p className="text-gray-500 text-sm mt-1">Manage and update all structure rental unit profiles.</p>
+          </div>
         </div>
 
-      </div>
+        {/* Search Input */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-xs p-4 flex items-center mb-6">
+          <Search size={18} className="text-gray-400" />
+          <input
+            placeholder="Search units by name or property..."
+            className="flex-1 ml-3 outline-none text-sm"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
 
-      {/* Search */}
+        {/* Status Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {["all", "available", "occupied", "under_maintenance"].map((status) => {
+            const isSelected = filter === status;
+            return (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize transition ${
+                  isSelected
+                    ? "text-white shadow-2xs"
+                    : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+                style={{ backgroundColor: isSelected ? Colors.primary : undefined }}
+              >
+                {status.replace(/_/g, " ")}
+              </button>
+            );
+          })}
+        </div>
 
-      <div className="bg-white rounded-xl border p-4 flex items-center">
+        {/* Units Portfolio Grid */}
+        {filteredUnits.length === 0 ? (
+          <div className="bg-white text-center rounded-2xl p-12 border border-dashed border-gray-200 max-w-md mx-auto mt-10">
+            <Building2 size={48} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-slate-900">No Units Available</h3>
+            <p className="text-sm text-gray-500 mt-1 px-4">There are no units matching your specified query context.</p>
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6 mt-8">
+            {filteredUnits.map((unit) => (
+              <div
+                key={unit.id}
+                className="bg-white rounded-2xl shadow-xs border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <img
+                  src={
+                    unit.images && unit.images.length > 0
+                      ? unit.images[0]
+                      : "https://placehold.co/600x400?text=No+Unit+Image"
+                  }
+                  alt={unit.name}
+                  className="h-52 w-full object-cover"
+                />
 
-        <Search size={18} />
+                <div className="p-5">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <h2 className="font-bold text-xl text-slate-900">{unit.name}</h2>
+                      <p className="text-gray-500 text-xs mt-1 flex items-center">
+                        <Building2 size={14} className="mr-1 text-gray-400" />
+                        {unit.property_name || "Unassigned Property"}
+                      </p>
+                    </div>
 
-        <input
-          placeholder="Search units..."
-          className="flex-1 ml-3 outline-none"
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                        unit.status === "available"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                          : unit.status === "occupied"
+                          ? "bg-blue-50 text-blue-700 border border-blue-100"
+                          : "bg-amber-50 text-amber-700 border border-amber-100"
+                      }`}
+                    >
+                      {(unit.status || "").replace(/_/g, " ")}
+                    </span>
+                  </div>
 
-      </div>
+                  <h3 className="font-bold text-2xl mt-5" style={{ color: Colors.primary }}>
+                    KES {Number(unit.price_per_month || 0).toLocaleString()}
+                    <span className="text-sm font-normal text-gray-500"> / month</span>
+                  </h3>
 
-      {/* Filters */}
+                  <div className="flex justify-between mt-6 text-gray-600 text-xs border-t border-gray-50 pt-4">
+                    <div className="flex items-center" title="Bedrooms">
+                      <BedDouble size={16} className="text-gray-400" />
+                      <span className="ml-1.5 font-medium">{unit.bedrooms || 0} Beds</span>
+                    </div>
 
-      <div className="flex gap-3 mt-6">
+                    <div className="flex items-center" title="Bathrooms">
+                      <Bath size={16} className="text-gray-400" />
+                      <span className="ml-1.5 font-medium">{unit.bathrooms || 0} Baths</span>
+                    </div>
 
-        {[
-          "all",
-          "available",
-          "occupied",
-          "under_maintenance",
-        ].map((status) => (
+                    <div className="flex items-center" title="Max Capacity">
+                      <Users size={16} className="text-gray-400" />
+                      <span className="ml-1.5 font-medium">{unit.max_guests || 0} Guests</span>
+                    </div>
+                  </div>
 
-          <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-5 py-2 rounded-full capitalize transition ${
-              filter === status
-                ? "bg-[#0A4429] text-white"
-                : "bg-white border"
-            }`}
-          >
-            {status.replace("_", " ")}
+                  <button
+                    onClick={() => openEdit(unit)}
+                    className="mt-6 w-full text-white py-3 rounded-xl flex justify-center items-center text-xs font-bold transition hover:opacity-90 shadow-2xs"
+                    style={{ backgroundColor: Colors.primary }}
+                  >
+                    <Pencil size={14} />
+                    <span className="ml-2">Edit Unit</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-          </button>
+        {/* Edit Unit Modal */}
+        {showModal && selectedUnit && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex justify-center items-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-150">
+              
+              <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                <h2 className="text-xl font-bold text-slate-900">Edit Unit Profile</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-1 rounded-lg text-gray-400 hover:text-slate-900 hover:bg-gray-100 transition"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-        ))}
-
-      </div>
-
-      {/* Cards */}
-
-      <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6 mt-8">
-
-        {filteredUnits.map((unit) => (
-
-          <div
-            key={unit.id}
-            className="bg-white rounded-2xl shadow border overflow-hidden"
-          >
-
-            <img
-              src={
-                unit.images.length
-                  ? unit.images[0]
-                  : "https://placehold.co/600x400"
-              }
-              className="h-52 w-full object-cover"
-            />
-
-            <div className="p-5">
-
-              <div className="flex justify-between">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Unit Label / Number</label>
+                  <input
+                    className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm transition focus:border-transparent"
+                    placeholder="e.g. Apartment 4B"
+                    value={selectedUnit.name || ""}
+                    onChange={(e) =>
+                      setSelectedUnit({ ...selectedUnit, name: e.target.value })
+                    }
+                  />
+                </div>
 
                 <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Description</label>
+                  <textarea
+                    className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm transition focus:border-transparent"
+                    rows="3"
+                    placeholder="Unit features or specifications..."
+                    value={selectedUnit.description || ""}
+                    onChange={(e) =>
+                      setSelectedUnit({ ...selectedUnit, description: e.target.value })
+                    }
+                  />
+                </div>
 
-                  <h2 className="font-bold text-xl">
-                    {unit.name}
-                  </h2>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Monthly Rent (KES)</label>
+                  <input
+                    type="number"
+                    className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm transition focus:border-transparent"
+                    placeholder="e.g. 25000"
+                    value={selectedUnit.price_per_month || ""}
+                    onChange={(e) =>
+                      setSelectedUnit({ ...selectedUnit, price_per_month: e.target.value })
+                    }
+                  />
+                </div>
 
-                  <p className="text-gray-500 mt-1 flex items-center">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Bedrooms</label>
+                    <input
+                      type="number"
+                      className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm"
+                      placeholder="Beds"
+                      value={selectedUnit.bedrooms || ""}
+                      onChange={(e) =>
+                        setSelectedUnit({ ...selectedUnit, bedrooms: e.target.value })
+                      }
+                    />
+                  </div>
 
-                    <Building2
-                      size={15}
-                      className="mr-1"
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Bathrooms</label>
+                    <input
+                      type="number"
+                      className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm"
+                      placeholder="Baths"
+                      value={selectedUnit.bathrooms || ""}
+                      onChange={(e) =>
+                        setSelectedUnit({ ...selectedUnit, bathrooms: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Max Guests</label>
+                    <input
+                      type="number"
+                      className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm"
+                      placeholder="Guests"
+                      value={selectedUnit.max_guests || ""}
+                      onChange={(e) =>
+                        setSelectedUnit({ ...selectedUnit, max_guests: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Occupancy Status</label>
+                  <select
+                    className="w-full border border-gray-200 rounded-xl p-3 outline-none text-sm bg-white"
+                    value={selectedUnit.status || "available"}
+                    onChange={(e) =>
+                      setSelectedUnit({ ...selectedUnit, status: e.target.value })
+                    }
+                  >
+                    <option value="available">Available</option>
+                    <option value="occupied">Occupied</option>
+                    <option value="under_maintenance">Under Maintenance</option>
+                  </select>
+                </div>
+
+                {/* Amenities Manager */}
+                <div className="space-y-3 pt-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Amenities & Features
+                  </label>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={amenity}
+                      onChange={(e) => setAmenity(e.target.value)}
+                      placeholder="e.g. High-Speed WiFi, Balcony"
+                      className="flex-1 border border-gray-200 rounded-xl p-3 text-sm outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addAmenity();
+                        }
+                      }}
                     />
 
-                    {unit.property_name}
+                    <button
+                      type="button"
+                      onClick={addAmenity}
+                      className="px-5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition"
+                      style={{ backgroundColor: Colors.primary }}
+                    >
+                      Add
+                    </button>
+                  </div>
 
-                  </p>
-
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {selectedUnit.amenities?.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-full px-3 py-1 text-xs font-medium"
+                      >
+                        <span>{item}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeAmenity(index)}
+                          className="ml-2 text-red-500 hover:text-red-700 font-bold text-sm"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    unit.status === "available"
-                      ? "text-green-700"
-                      : unit.status ===
-                        "occupied"
-                      ? "text-blue-700"
-                      : "text-orange-700"
-                  }`}
+                {/* Image Upload Gallery */}
+                <div className="space-y-3 pt-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Unit Media
+                  </label>
+
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="block w-full text-xs text-gray-500
+                               file:mr-4 file:py-2 file:px-4
+                               file:rounded-xl file:border-0
+                               file:text-xs file:font-semibold
+                               file:bg-gray-100 file:text-slate-700
+                               hover:file:bg-gray-200
+                               file:cursor-pointer cursor-pointer"
+                  />
+
+                  <div className="grid grid-cols-3 gap-3 pt-2">
+                    {/* Display existing images if no new ones picked */}
+                    {selectedImages.length === 0 &&
+                      selectedUnit.images?.map((img, index) => (
+                        <img
+                          key={index}
+                          src={img}
+                          className="h-24 w-full rounded-xl object-cover border border-gray-100"
+                          alt="Unit preview"
+                        />
+                      ))}
+
+                    {/* Preview new selected files */}
+                    {selectedImages.map((file, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          className="h-24 w-full rounded-xl object-cover border border-gray-100"
+                          alt="New preview"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedImages(
+                              selectedImages.filter((_, i) => i !== index)
+                            )
+                          }
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xs"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 p-4 flex justify-end gap-3 bg-gray-50/50 rounded-b-2xl">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-100 transition"
                 >
-                  {unit.status.replace("_", " ")}
+                  Cancel
+                </button>
 
-                </span>
-
+                <button
+                  type="button"
+                  onClick={saveUnit}
+                  disabled={isSaving}
+                  className="px-5 py-2.5 rounded-xl text-white font-medium text-sm transition hover:opacity-90 disabled:opacity-50 flex items-center justify-center"
+                  style={{ backgroundColor: Colors.primary }}
+                >
+                  {isSaving ? (
+                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
               </div>
-
-              <h3 className="text-[#0A4429] font-bold text-2xl mt-5">
-
-                Ksh. {unit.price_per_month}
-
-                <span className="text-sm font-normal text-gray-500">
-                  {" "}
-                  / month
-                </span>
-
-              </h3>
-
-              <div className="flex justify-between mt-6 text-gray-600">
-
-                <div className="flex items-center">
-                  <BedDouble size={18} />
-                  <span className="ml-1">
-                    {unit.bedrooms}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <Bath size={18} />
-                  <span className="ml-1">
-                    {unit.bathrooms}
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <Users size={18} />
-                  <span className="ml-1">
-                    {unit.max_guests}
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                onClick={() =>
-                  openEdit(unit)
-                }
-                className="mt-6 w-full bg-[#0A4429] text-white py-3 rounded-xl flex justify-center items-center"
-              >
-
-                <Pencil size={18} />
-
-                <span className="ml-2">
-                  Edit Unit
-                </span>
-
-              </button>
 
             </div>
-
           </div>
-
-        ))}
-
+        )}
       </div>
-
-      {/* Modal */}
-
-      {showModal && (
-
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-
-          <div className="bg-white rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
-
-            <div className="flex justify-between items-center p-6 border-b">
-
-              <h2 className="text-2xl font-bold">
-                Edit Unit
-              </h2>
-
-              <button
-                onClick={() =>
-                  setShowModal(false)
-                }
-              >
-                <X />
-              </button>
-
-            </div>
-            <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-4">
-
-              <input
-                className="w-full border rounded-xl p-3"
-                placeholder="Unit Name"
-                value={selectedUnit.name}
-                onChange={(e) =>
-                  setSelectedUnit({
-                    ...selectedUnit,
-                    name: e.target.value,
-                  })
-                }
-              />
-
-              <textarea
-                className="w-full border rounded-xl p-3"
-                rows="4"
-                placeholder="Description"
-                value={selectedUnit.description}
-                onChange={(e) =>
-                  setSelectedUnit({
-                    ...selectedUnit,
-                    description:
-                      e.target.value,
-                  })
-                }
-              />
-
-              <input
-                type="number"
-                className="w-full border rounded-xl p-3"
-                placeholder="Monthly Rent"
-                value={selectedUnit.price_per_month}
-                onChange={(e) =>
-                  setSelectedUnit({
-                    ...selectedUnit,
-                    price_per_month:
-                      e.target.value,
-                  })
-                }
-              />
-
-              <div className="grid grid-cols-3 gap-4">
-
-                <input
-                  type="number"
-                  className="border rounded-xl p-3"
-                  placeholder="bedrooms"
-                  value={selectedUnit.bedrooms}
-                  onChange={(e) =>
-                    setSelectedUnit({
-                      ...selectedUnit,
-                      bedrooms:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="number"
-                  className="border rounded-xl p-3"
-                  placeholder="bathrooms"
-                  value={selectedUnit.bathrooms}
-                  onChange={(e) =>
-                    setSelectedUnit({
-                      ...selectedUnit,
-                      bathrooms:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="number"
-                  className="border rounded-xl p-3"
-                  placeholder="max guests"
-                  value={selectedUnit.max_guests}
-                  onChange={(e) =>
-                    setSelectedUnit({
-                      ...selectedUnit,
-                      max_guests:
-                        e.target.value,
-                    })
-                  }
-                />
-
-              </div>
-
-              <select
-                className="w-full border rounded-xl p-3"
-                value={selectedUnit.status}
-                onChange={(e) =>
-                  setSelectedUnit({
-                    ...selectedUnit,
-                    status:
-                      e.target.value,
-                  })
-                }
-              >
-                <option value="available">
-                  Available
-                </option>
-
-                <option value="occupied">
-                  Occupied
-                </option>
-
-                <option value="under_maintenance">
-                  Under Maintenance
-                </option>
-
-              </select>
-
-
-              <div className="space-y-3">
-
-  <label className="font-medium text-gray-700">
-    Amenities
-  </label>
-
-  <div className="flex gap-2">
-
-    <input
-      type="text"
-      value={amenity}
-      onChange={(e) => setAmenity(e.target.value)}
-      placeholder="e.g. WiFi"
-      className="flex-1 border rounded-xl p-3"
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          addAmenity();
-        }
-      }}
-    />
-
-    <button
-      type="button"
-      onClick={addAmenity}
-      className="px-5 rounded-xl bg-[#0A4429] text-white"
-    >
-      Add
-    </button>
-
-  </div>
-
-  <div className="flex flex-wrap gap-2">
-
-    {selectedUnit.amenities?.map((item, index) => (
-      <div
-        key={index}
-        className="flex items-center bg-green-100 text-green-800 rounded-full px-3 py-1"
-      >
-        <span>{item}</span>
-
-        <button
-          type="button"
-          onClick={() => removeAmenity(index)}
-          className="ml-2 text-red-600 font-bold"
-        >
-          ×
-        </button>
-      </div>
-    ))}
-
-  </div>
-
-</div>
-
-             <div className="space-y-4">
-
-  <label className="block">
-    <span className="sr-only">Choose Images</span>
-
-    <input
-      type="file"
-      multiple
-      accept="image/*"
-      onChange={handleImageChange}
-      className="block w-full text-sm text-gray-700
-                 file:mr-4 file:py-2 file:px-4
-                 file:rounded-lg file:border-0
-                 file:bg-[#0A4429]
-                 file:text-white
-                 file:cursor-pointer
-                 cursor-pointer"
-    />
-  </label>
-
-  <div className="grid grid-cols-3 gap-3">
-
-    {/* Show existing images if no new ones selected */}
-    {selectedImages.length === 0 &&
-      selectedUnit.images?.map((img, index) => (
-        <img
-          key={index}
-          src={img}
-          className="h-24 w-full rounded-lg object-cover"
-          alt=""
-        />
-      ))}
-
-    {/* Preview newly selected images */}
-    {selectedImages.map((file, index) => (
-      <div key={index} className="relative">
-
-        <img
-          src={URL.createObjectURL(file)}
-          className="h-24 w-full rounded-lg object-cover"
-          alt=""
-        />
-
-        <button
-          type="button"
-          onClick={() =>
-            setSelectedImages(
-              selectedImages.filter((_, i) => i !== index)
-            )
-          }
-          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white"
-        >
-          ×
-        </button>
-
-      </div>
-    ))}
-
-  </div>
-
-</div>
-
-              <div className="border-t p-6 flex justify-end gap-3">
-  <button
-    onClick={() => setShowModal(false)}
-    className="px-5 py-2 rounded-lg border"
-  >
-    Cancel
-  </button>
-
-  <button
-    onClick={saveUnit}
-    className="px-5 py-2 rounded-lg bg-[#0A4429] text-white"
-  >
-   {isSaving ? "Saving..." : "Save Changes"}
-  </button>
-</div>
-
-            </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
-    </div>
     </Layout>
   );
 }

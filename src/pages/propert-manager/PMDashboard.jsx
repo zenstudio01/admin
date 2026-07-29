@@ -10,8 +10,6 @@ import {
 } from "react-icons/fa";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -20,7 +18,8 @@ import {
   AreaChart,
 } from "recharts";
 import Layout from "../../layouts/Layout";
-import api from "../../api/api"; // Adjust this relative path to match your API helper module
+import api from "../../api/api";
+import Colors from "../../constants/colors";
 
 export default function PMDashboard() {
   const [userName, setUserName] = useState("Property Manager");
@@ -64,12 +63,12 @@ export default function PMDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/prop/dashboard_statistics/"); // Replace with your exact URL route parameter
+      const response = await api.get("/prop/dashboard_statistics/");
       if (response.data) {
         setDashboardData(response.data);
       }
     } catch (error) {
-      console.error("Error connecting to administrative ecosystem metrics metrics:", error);
+      console.error("Error connecting to administrative ecosystem metrics:", error);
     } finally {
       setLoading(false);
     }
@@ -77,31 +76,46 @@ export default function PMDashboard() {
 
   const stats = dashboardData.statistics;
 
-  // Flattened KPI maps directly utilizing the API response keys
+  // Primary KPI metrics array using Colors.primary
   const primaryMetricCards = [
-    { title: "Managed Properties", value: stats.properties, icon: <FaBuilding />, color: "bg-[#0A4429]" },
-    { title: "Total Units Tracked", value: stats.units, icon: <FaDoorOpen />, color: "bg-[#2E9D47]" },
-    { title: "Active Tenants", value: stats.tenants, icon: <FaUsers />, color: "bg-[#0A4429]" },
-    { title: "Monthly Collection", value: `KES ${stats.monthly_revenue.toLocaleString()}`, icon: <FaMoneyBillWave />, color: "bg-emerald-600" },
+    { title: "Managed Properties", value: stats.properties, icon: <FaBuilding /> },
+    { title: "Total Units Tracked", value: stats.units, icon: <FaDoorOpen /> },
+    { title: "Active Tenants", value: stats.tenants, icon: <FaUsers /> },
+    { title: "Monthly Collection", value: `KES ${stats.monthly_revenue.toLocaleString()}`, icon: <FaMoneyBillWave /> },
   ];
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#F4F1E6]/40 p-4 md:p-8 font-sans">
+      <div 
+        className="min-h-screen p-4 md:p-8 font-sans"
+        style={{ backgroundColor: Colors.background || "#FFFFFF" }}
+      >
         
         {/* Header Greeting Section */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-[#0A4429] tracking-tight">
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
               Property Manager Dashboard
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Welcome back, <span className="font-semibold text-[#2E9D47]">{userName}</span>. Here is what is happening across your properties today.
+              Welcome back,{" "}
+              <span className="font-semibold" style={{ color: Colors.primary }}>
+                {userName}
+              </span>
+              . Here is what is happening across your properties today.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-[#0A4429]/5 px-4 py-2 rounded-xl border border-[#0A4429]/10 self-start">
-            <div className="w-2.5 h-2.5 bg-[#2E9D47] rounded-full animate-pulse"></div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#0A4429]">
+          <div 
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 self-start bg-white"
+          >
+            <div 
+              className="w-2.5 h-2.5 rounded-full animate-pulse"
+              style={{ backgroundColor: Colors.primary }}
+            ></div>
+            <span 
+              className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color: Colors.primary }}
+            >
               Live Properties Status
             </span>
           </div>
@@ -109,7 +123,10 @@ export default function PMDashboard() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
+            <div 
+              className="h-8 w-8 border-4 border-t-transparent rounded-full animate-spin"
+              style={{ borderColor: `${Colors.primary} transparent transparent transparent` }}
+            ></div>
           </div>
         ) : (
           <>
@@ -125,11 +142,14 @@ export default function PMDashboard() {
                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                         {item.title}
                       </p>
-                      <h3 className="text-2xl font-bold mt-2 text-[#0A4429]">
+                      <h3 className="text-2xl font-bold mt-2 text-slate-900">
                         {item.value}
                       </h3>
                     </div>
-                    <div className={`${item.color} text-white p-4 rounded-xl text-xl shadow-inner`}>
+                    <div 
+                      className="text-white p-4 rounded-xl text-xl shadow-inner"
+                      style={{ backgroundColor: Colors.primary }}
+                    >
                       {item.icon}
                     </div>
                   </div>
@@ -143,19 +163,27 @@ export default function PMDashboard() {
               {/* Panel 1: Occupancy Distribution Progress Metric */}
               <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-[#0A4429] mb-1">Occupancy Summary</h3>
-                  <p className="text-xs text-gray-400 mb-4">Current state index: <span className="font-bold text-[#2E9D47]">{stats.occupancy_rate}% Occupied</span></p>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">Occupancy Summary</h3>
+                  <p className="text-xs text-gray-400 mb-4">
+                    Current state index:{" "}
+                    <span className="font-bold" style={{ color: Colors.primary }}>
+                      {stats.occupancy_rate}% Occupied
+                    </span>
+                  </p>
                   
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between text-xs font-medium">
                         <span className="text-gray-600">Occupied Units</span>
-                        <span className="text-[#0A4429] font-bold">{stats.occupied_units} / {stats.units}</span>
+                        <span className="text-slate-900 font-bold">{stats.occupied_units} / {stats.units}</span>
                       </div>
                       <div className="w-full bg-gray-100 h-2 rounded-full mt-1.5">
                         <div 
-                          className="bg-[#2E9D47] h-2 rounded-full transition-all duration-500" 
-                          style={{ width: `${stats.occupancy_rate}%` }}
+                          className="h-2 rounded-full transition-all duration-500" 
+                          style={{ 
+                            width: `${stats.occupancy_rate}%`,
+                            backgroundColor: Colors.primary
+                          }}
                         ></div>
                       </div>
                     </div>
@@ -182,7 +210,7 @@ export default function PMDashboard() {
 
               {/* Panel 2: Maintenance Tracker Operations */}
               <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6">
-                <h3 className="text-lg font-bold text-[#0A4429] mb-1">Maintenance Health</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Maintenance Health</h3>
                 <p className="text-xs text-gray-400 mb-4">Active operational repair ticket tasks.</p>
                 
                 <div className="space-y-3 text-sm font-medium">
@@ -194,10 +222,17 @@ export default function PMDashboard() {
                     <span className="font-bold text-base">{stats.pending_maintenance}</span>
                   </div>
                   
-                  <div className="flex justify-between items-center p-3 rounded-xl bg-green-50/70 border border-green-100 text-green-800">
-                    <div className="flex items-center gap-2 text-xs">
-                      <FaCheckCircle className="text-[#2E9D47]" />
-                      <span>Completed &amp; Settled Actions</span>
+                  <div 
+                    className="flex justify-between items-center p-3 rounded-xl border text-xs"
+                    style={{
+                      backgroundColor: `${Colors.primary}10`,
+                      borderColor: `${Colors.primary}25`,
+                      color: Colors.primary
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FaCheckCircle style={{ color: Colors.primary }} />
+                      <span className="font-medium">Completed &amp; Settled Actions</span>
                     </div>
                     <span className="font-bold text-base">{stats.completed_maintenance}</span>
                   </div>
@@ -206,7 +241,7 @@ export default function PMDashboard() {
 
               {/* Panel 3: Recent Properties Matrix List */}
               <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6">
-                <h3 className="text-lg font-bold text-[#0A4429] mb-1">Recent Portfolios Added</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Recent Portfolios Added</h3>
                 <p className="text-xs text-gray-400 mb-4">Latest assets onboarded into system registries.</p>
                 
                 <div className="space-y-3">
@@ -226,7 +261,13 @@ export default function PMDashboard() {
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="inline-block text-[9px] font-bold uppercase tracking-wider bg-green-100 text-green-800 px-2 py-0.5 rounded-md mb-1">
+                          <span 
+                            className="inline-block text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md mb-1"
+                            style={{
+                              backgroundColor: `${Colors.primary}15`,
+                              color: Colors.primary
+                            }}
+                          >
                             {property.status}
                           </span>
                           <p className="text-[11px] text-gray-500 font-medium">{property.units} Units</p>
@@ -241,53 +282,53 @@ export default function PMDashboard() {
 
             {/* Bottom Section: Revenue Tracking Blocks */}
             <div className="bg-white rounded-2xl shadow-xs border border-gray-100 p-6 mt-8">
-  <h3 className="text-lg font-bold text-[#0A4429]">
-    Monthly Revenue Trend
-  </h3>
+              <h3 className="text-lg font-bold text-slate-900">
+                Monthly Revenue Trend
+              </h3>
 
-  <p className="text-sm text-gray-500 mb-6">
-    Revenue collected over the last months.
-  </p>
+              <p className="text-sm text-gray-500 mb-6">
+                Revenue collected over the last months.
+              </p>
 
-  <div className="h-80">
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={dashboardData.revenue_graph}>
-        <defs>
-          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#2E9D47" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="#2E9D47" stopOpacity={0.02} />
-          </linearGradient>
-        </defs>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={dashboardData.revenue_graph}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={Colors.primary} stopOpacity={0.35} />
+                        <stop offset="95%" stopColor={Colors.primary} stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
 
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
 
-        <XAxis
-          dataKey="month"
-          tick={{ fontSize: 12 }}
-        />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12 }}
+                    />
 
-        <YAxis
-          tickFormatter={(value) => `${value / 1000}K`}
-        />
+                    <YAxis
+                      tickFormatter={(value) => `${value / 1000}K`}
+                    />
 
-        <Tooltip
-          formatter={(value) => [
-            `KES ${Number(value).toLocaleString()}`,
-            "Revenue",
-          ]}
-        />
+                    <Tooltip
+                      formatter={(value) => [
+                        `KES ${Number(value).toLocaleString()}`,
+                        "Revenue",
+                      ]}
+                    />
 
-        <Area
-          type="monotone"
-          dataKey="revenue"
-          stroke="#2E9D47"
-          strokeWidth={3}
-          fill="url(#colorRevenue)"
-        />
-      </AreaChart>
-    </ResponsiveContainer>
-  </div>
-</div>
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke={Colors.primary}
+                      strokeWidth={3}
+                      fill="url(#colorRevenue)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </>
         )}
       </div>

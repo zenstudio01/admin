@@ -15,12 +15,14 @@ import {
 import Layout from "../../layouts/Layout";
 import Swal from "sweetalert2";
 import api from "../../api/api";
+import Colors from "../../constants/colors";
 
 export default function Landlords() {
   const [landlords, setLandlords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   const [properties, setProperties] = useState([]);
 
@@ -46,65 +48,75 @@ export default function Landlords() {
 
     } catch (error) {
       console.error("Error loading landlords database profile", error);
+      Swal.fire({
+        icon: "error",
+        title: "Sync Error",
+        text: "Failed to retrieve landlords directory.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const fetchProperties = async () => {
-  try {
-    const response = await api.get("/property_list/");
-    setProperties(response.data);
-  } catch (error) {
-    console.error(error);
-  }
-};
+    try {
+      const response = await api.get("/property_list/");
+      setProperties(response.data);
+    } catch (error) {
+      console.error("Error loading properties list", error);
+    }
+  };
 
   const handleInputChange = (e) => {
     setNewLandlord({ ...newLandlord, [e.target.name]: e.target.value });
   };
 
   const handleAddLandlord = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setIsAdding(true);
 
-  try {
+    try {
+      await api.post("/landlords/add_landlord/", {
+        name: newLandlord.name,
+        email: newLandlord.email,
+        phone_number: newLandlord.phone_number,
+        commission_rate: newLandlord.commission_rate,
+        property_id: newLandlord.assigned_properties,
+      });
 
-    await api.post("/landlords/add_landlord/", {
-      name: newLandlord.name,
-      email: newLandlord.email,
-      phone_number: newLandlord.phone_number,
-      commission_rate: newLandlord.commission_rate,
-      property_id: newLandlord.assigned_properties,
-    });
+      Swal.fire({
+        icon: "success",
+        title: "Landlord Added",
+        text: "The new asset owner has been successfully registered.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
 
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "Landlord added successfully.",
-    });
+      fetchLandlords();
+      setIsModalOpen(false);
 
-    fetchLandlords();
+      setNewLandlord({
+        name: "",
+        email: "",
+        phone_number: "",
+        commission_rate: "",
+        assigned_properties: "",
+      });
 
-    setIsModalOpen(false);
+    } catch (error) {
+      console.error("Unable to add landlord", error);
 
-    setNewLandlord({
-      name: "",
-      email: "",
-      phone_number: "",
-      commission_rate: "",
-      assigned_properties: "",
-    });
-
-  } catch (error) {
-    console.log(error);
-
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Unable to add landlord.",
-    });
-  }
-};
+      Swal.fire({
+        icon: "error",
+        title: "Setup Failed",
+        text: error.response?.data?.message || "Unable to register landlord. Please try again.",
+      });
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   const triggerPayoutSettlement = (landlord) => {
     Swal.fire({
@@ -112,34 +124,44 @@ export default function Landlords() {
       text: `Authorize monthly rental payment transfer to ${landlord.name} via configured bank account/M-Pesa wallet node?`,
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#2E9D47",
+      confirmButtonColor: Colors.primary || "#2E9D47",
       cancelButtonColor: "#d33",
       confirmButtonText: "Disburse Funds"
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire("Disbursed!", "The payout routing protocol has been successfully initiated.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "Disbursed!",
+          text: "The payout routing protocol has been successfully initiated.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
       }
     });
   };
 
   const filteredLandlords = landlords.filter(l => 
-    l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (l.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.email || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#F4F1E6]/30 p-4 md:p-8 font-sans">
+      <div 
+        className="min-h-screen p-4 md:p-8 font-sans"
+        style={{ backgroundColor: Colors.background || "#FFFFFF" }}
+      >
         
         {/* Module Header Elements */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#0A4429] tracking-tight">Landlords</h1>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Landlords</h1>
             <p className="text-sm text-gray-500 mt-1">Manage asset owners, custom commission contracts, and automated financial disbursements.</p>
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm text-sm self-start sm:self-center"
+            className="flex items-center justify-center gap-2 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-xs text-sm hover:opacity-90 self-start sm:self-center"
+            style={{ backgroundColor: Colors.primary }}
           >
             <Plus size={18} />
             <span>Add Landlord</span>
@@ -147,7 +169,7 @@ export default function Landlords() {
         </div>
 
         {/* Filters and Controls */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-xs p-4 mb-6">
           <div className="relative w-full max-w-md">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
               <Search size={18} />
@@ -157,7 +179,7 @@ export default function Landlords() {
               placeholder="Search landlords by name or email details..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] focus:border-transparent text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg outline-none text-sm transition focus:border-transparent"
             />
           </div>
         </div>
@@ -165,12 +187,15 @@ export default function Landlords() {
         {/* Landlord Portfolio List Grid */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="h-8 w-8 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
+            <div 
+              className="h-8 w-8 border-4 border-t-transparent rounded-full animate-spin"
+              style={{ borderColor: `${Colors.primary} transparent transparent transparent` }}
+            ></div>
           </div>
         ) : filteredLandlords.length === 0 ? (
           <div className="bg-white text-center rounded-2xl p-12 border border-dashed border-gray-200 max-w-md mx-auto mt-10">
             <Users size={48} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-[#0A4429]">No Landlords Found</h3>
+            <h3 className="text-lg font-bold text-slate-900">No Landlords Found</h3>
             <p className="text-sm text-gray-500 mt-1 px-4">There are no asset owners connected or registered to your property system dashboard context yet.</p>
           </div>
         ) : (
@@ -178,16 +203,22 @@ export default function Landlords() {
             {filteredLandlords.map((landlord) => (
               <div 
                 key={landlord.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6 hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl border border-gray-100 shadow-xs p-6 space-y-6 hover:shadow-md transition-shadow"
               >
                 {/* Upper Details Panel */}
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#0A4429]/5 flex items-center justify-center text-[#0A4429] font-bold text-lg">
-                      {landlord.name.charAt(0)}
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg"
+                      style={{ 
+                        backgroundColor: `${Colors.primary}10`, 
+                        color: Colors.primary 
+                      }}
+                    >
+                      {landlord.name ? landlord.name.charAt(0).toUpperCase() : "L"}
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-[#0A4429]">{landlord.name}</h3>
+                      <h3 className="font-bold text-lg text-slate-900">{landlord.name}</h3>
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-gray-500 mt-1">
                         <span className="flex items-center gap-1"><Mail size={12} /> {landlord.email}</span>
                         <span className="hidden sm:inline text-gray-300">|</span>
@@ -195,7 +226,14 @@ export default function Landlords() {
                       </div>
                     </div>
                   </div>
-                  <span className="bg-[#2E9D47]/10 text-[#0A4429] border border-[#2E9D47]/20 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 self-start sm:self-auto">
+                  <span 
+                    className="border px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 self-start sm:self-auto"
+                    style={{ 
+                      backgroundColor: `${Colors.primary}10`, 
+                      borderColor: `${Colors.primary}20`,
+                      color: Colors.primary 
+                    }}
+                  >
                     <Percent size={12} /> {landlord.commission_rate}% Commission Rate
                   </span>
                 </div>
@@ -204,27 +242,28 @@ export default function Landlords() {
                 <div className="grid grid-cols-3 gap-4 border-t border-b border-gray-50 py-4 text-center">
                   <div>
                     <p className="text-xs text-gray-400 flex items-center justify-center gap-1"><Building2 size={12} /> Buildings</p>
-                    <p className="font-bold text-base text-[#0A4429] mt-1">{landlord.properties_count}</p>
+                    <p className="font-bold text-base text-slate-900 mt-1">{landlord.properties_count || 0}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">Total Units</p>
-                    <p className="font-bold text-base text-[#0A4429] mt-1">{landlord.total_units || "--"}</p>
+                    <p className="font-bold text-base text-slate-900 mt-1">{landlord.total_units || "--"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 flex items-center justify-center gap-1"><DollarSign size={12} /> Last Payout</p>
-                    <p className="font-bold text-base text-[#2E9D47] mt-1">{landlord.last_payout}</p>
+                    <p className="font-bold text-base mt-1" style={{ color: Colors.primary }}>{landlord.last_payout || "KES 0"}</p>
                   </div>
                 </div>
 
                 {/* Footer Action Bars */}
                 <div className="flex justify-between items-center gap-4 text-sm">
-                  <button className="text-xs font-semibold text-gray-500 hover:text-[#0A4429] flex items-center gap-1 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition">
+                  <button className="text-xs font-semibold text-gray-500 hover:text-slate-900 flex items-center gap-1 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition">
                     <FileCheck size={14} />
                     <span>View Financial Statements</span>
                   </button>
                   <button 
                     onClick={() => triggerPayoutSettlement(landlord)}
-                    className="text-xs font-semibold bg-[#0A4429] hover:bg-[#2E9D47] text-white flex items-center gap-1 px-4 py-2 rounded-lg transition shadow-sm"
+                    className="text-xs font-semibold text-white flex items-center gap-1 px-4 py-2 rounded-lg transition shadow-2xs hover:opacity-90"
+                    style={{ backgroundColor: Colors.primary }}
                   >
                     <span>Process Payout</span>
                     <ArrowUpRight size={14} />
@@ -237,13 +276,16 @@ export default function Landlords() {
 
         {/* Onboarding Form Sheet Drawer */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-2xs">
             <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
               
-              <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#0A4429] text-white">
+              <div 
+                className="p-6 border-b border-gray-100 flex items-center justify-between text-white"
+                style={{ backgroundColor: Colors.primary }}
+              >
                 <div>
                   <h3 className="text-lg font-bold">Add Landlord</h3>
-                  <p className="text-xs text-[#F4F1E6]/70 mt-0.5">Initialize external asset legal entities.</p>
+                  <p className="text-xs text-white/80 mt-0.5">Initialize external asset legal entities.</p>
                 </div>
                 <button 
                   onClick={() => setIsModalOpen(false)}
@@ -263,7 +305,7 @@ export default function Landlords() {
                     value={newLandlord.name}
                     onChange={handleInputChange}
                     placeholder="e.g. Simon Waweru"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none text-sm transition focus:border-transparent"
                   />
                 </div>
 
@@ -276,7 +318,7 @@ export default function Landlords() {
                     value={newLandlord.email}
                     onChange={handleInputChange}
                     placeholder="johndoe@example.com"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none text-sm transition focus:border-transparent"
                   />
                 </div>
 
@@ -289,7 +331,7 @@ export default function Landlords() {
                     value={newLandlord.phone_number}
                     onChange={handleInputChange}
                     placeholder="e.g. +254722111222"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none text-sm transition focus:border-transparent"
                   />
                 </div>
 
@@ -306,47 +348,54 @@ export default function Landlords() {
                       value={newLandlord.commission_rate}
                       onChange={handleInputChange}
                       placeholder="Standard range: 10 - 20"
-                      className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm"
+                      className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg outline-none text-sm transition focus:border-transparent"
                     />
                   </div>
                   <p className="text-[11px] text-gray-400 mt-1">Based on UNIT core models, normal platform agency rates split between 10% and 20% total volume gross yield values.</p>
                 </div>
 
                 <div>
-  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
-    Select Property
-  </label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                    Select Property
+                  </label>
 
-  <select
-    name="assigned_properties"
-    value={newLandlord.assigned_properties}
-    onChange={handleInputChange}
-    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E9D47] text-sm bg-white"
-    required
-  >
-    <option value="">Select Property</option>
-
-    {properties.map((property) => (
-      <option key={property.id} value={property.id}>
-        {property.name}
-      </option>
-    ))}
-  </select>
-</div>
+                  <select
+                    name="assigned_properties"
+                    value={newLandlord.assigned_properties}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none text-sm bg-white transition focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select Property</option>
+                    {properties.map((property) => (
+                      <option key={property.id} value={property.id}>
+                        {property.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div className="pt-4 border-t border-gray-100 flex gap-3">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm hover:bg-gray-50"
+                    className="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm hover:bg-gray-50 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-[#2E9D47] hover:bg-[#0A4429] text-white font-medium py-2.5 rounded-xl text-sm"
+                    disabled={isAdding}
+                    className="flex-1 text-white font-medium py-2.5 rounded-xl text-sm transition hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: Colors.primary }}
                   >
-                    Add Landlord
+                    {isAdding ? (
+                      <div className="flex justify-center">
+                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      "Add Landlord"
+                    )}
                   </button>
                 </div>
               </form>

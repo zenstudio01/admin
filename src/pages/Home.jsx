@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import HomeHeader from "../components/Home-header";
 import HomeFooter from "../components/Home-footer";
+import Colors from "../constants/colors";
 
 import {
   Search,
@@ -13,8 +14,6 @@ import {
   Users,
   Briefcase,
   Building2,
-  Menu,
-  X,
   ChevronRight,
   Sparkles,
   Hammer,
@@ -28,14 +27,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaLinkedinIn,
-} from "react-icons/fa";
-
 export default function Home() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchService, setSearchService] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
 
@@ -55,10 +47,13 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#111827] font-sans antialiased selection:bg-[#22C55E] selection:text-white overflow-x-hidden">
+    <div 
+      className="min-h-screen text-[#111827] font-sans antialiased overflow-x-hidden"
+      style={{ backgroundColor: Colors.background || "#FFFFFF" }}
+    >
       
       {/* NAVIGATION HEADER */}
-      <HomeHeader/>
+      <HomeHeader />
 
       {/* 1. HERO SECTION & 2. PREMIUM SEARCH INTEGRATION */}
       <section id="home" className="relative pt-8 pb-16 lg:py-24 overflow-hidden border-b border-slate-100">
@@ -67,11 +62,14 @@ export default function Home() {
             
             {/* Left Column: Messaging & Active Search Input Console */}
             <div className="lg:col-span-7 space-y-6 transition-all duration-700 ease-out transform translate-x-0 opacity-100">
-              <div className="inline-flex items-center gap-2 bg-[#22C55E]/10 text-[#0A4429] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse">
-                <UserCheck size={14} className="text-[#22C55E]" /> 100% Vetted Local Experts
+              <div 
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse"
+                style={{ backgroundColor: `${Colors.primary}15`, color: Colors.primary }}
+              >
+                <UserCheck size={14} style={{ color: Colors.primary }} /> 100% Vetted Local Experts
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0A4429] leading-tight tracking-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-slate-900">
                 Find Trusted Professionals &amp; Businesses Near You
               </h1>
               
@@ -81,10 +79,14 @@ export default function Home() {
 
               {/* Action Buttons Matrix */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
-                <a href="#search-block" className="bg-[#22C55E] hover:bg-[#1ca84f] text-white font-bold text-sm px-6 py-3.5 rounded-xl transition-all duration-300 shadow-md shadow-emerald-500/20 flex items-center gap-2 transform hover:translate-y-[-2px] hover:shadow-lg group">
+                <a 
+                  href="#search-block" 
+                  className="text-white font-bold text-sm px-6 py-3.5 rounded-xl transition-all duration-300 shadow-md flex items-center gap-2 transform hover:translate-y-[-2px] hover:shadow-lg group"
+                  style={{ backgroundColor: Colors.primary }}
+                >
                   Find Services <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
                 </a>
-                <button className="border-2 border-slate-200 hover:border-[#0A4429] text-slate-700 hover:text-[#0A4429] font-bold text-sm px-6 py-3.5 rounded-xl transition-all duration-300 bg-white transform hover:translate-y-[-2px]">
+                <button className="border-2 border-slate-200 hover:border-slate-800 text-slate-700 hover:text-slate-900 font-bold text-sm px-6 py-3.5 rounded-xl transition-all duration-300 bg-white transform hover:translate-y-[-2px]">
                   Register Your Business
                 </button>
               </div>
@@ -94,23 +96,23 @@ export default function Home() {
                 <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Start searching instantly</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="relative group">
-                    <Search className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#22C55E] transition-colors duration-200" size={18} />
+                    <Search className="absolute left-3.5 top-3.5 text-slate-400 transition-colors duration-200" size={18} />
                     <input 
                       type="text"
                       placeholder="Search electricians, painters, cleaners..."
                       value={searchService}
                       onChange={(e) => setSearchService(e.target.value)}
-                      className="w-full bg-slate-50 pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#22C55E] focus:bg-white text-gray-800 transition-all duration-300 shadow-xs focus:shadow-md"
+                      className="w-full bg-slate-50 pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:bg-white text-gray-800 transition-all duration-300 shadow-xs focus:shadow-md"
                     />
                   </div>
                   <div className="relative group">
-                    <MapPin className="absolute left-3.5 top-3.5 text-[#22C55E]" size={18} />
+                    <MapPin className="absolute left-3.5 top-3.5" style={{ color: Colors.primary }} size={18} />
                     <input 
                       type="text"
                       placeholder="Your Location (e.g. Nairobi)"
                       value={searchLocation}
                       onChange={(e) => setSearchLocation(e.target.value)}
-                      className="w-full bg-slate-50 pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#22C55E] focus:bg-white text-gray-800 transition-all duration-300 shadow-xs focus:shadow-md"
+                      className="w-full bg-slate-50 pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:bg-white text-gray-800 transition-all duration-300 shadow-xs focus:shadow-md"
                     />
                   </div>
                 </div>
@@ -121,13 +123,16 @@ export default function Home() {
                       <button 
                         key={i} 
                         onClick={() => setSearchService(service)}
-                        className="text-xs font-semibold text-slate-600 hover:text-[#0A4429] bg-slate-100 hover:bg-[#22C55E]/10 px-2.5 py-1 rounded-md transition-all duration-200 active:scale-95 transform"
+                        className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md transition-all duration-200 active:scale-95 transform"
                       >
                         {service}
                       </button>
                     ))}
                   </div>
-                  <button className="bg-[#0A4429] hover:bg-[#062c1a] text-white font-bold text-sm px-6 py-3 rounded-xl transition-all duration-300 w-full sm:w-auto shadow-sm transform hover:scale-[1.03] active:scale-95">
+                  <button 
+                    className="text-white font-bold text-sm px-6 py-3 rounded-xl transition-all duration-300 w-full sm:w-auto shadow-sm transform hover:scale-[1.03] active:scale-95"
+                    style={{ backgroundColor: Colors.primary }}
+                  >
                     Find Services
                   </button>
                 </div>
@@ -137,15 +142,20 @@ export default function Home() {
 
             {/* Right Column: Custom Trust Illustration Wrapper Grid */}
             <div className="lg:col-span-5 relative hidden lg:flex items-center justify-center transition-all duration-1000 delay-200 transform translate-x-0 opacity-100">
-              <div className="absolute inset-0 bg-radial from-[#22C55E]/10 to-transparent rounded-full blur-3xl transform scale-110 -z-10 animate-pulse" />
+              <div 
+                className="absolute inset-0 rounded-full blur-3xl transform scale-110 -z-10 animate-pulse"
+                style={{ backgroundColor: `${Colors.primary}1A` }}
+              />
               <div className="w-full max-w-md bg-gradient-to-tr from-slate-50 to-white border border-slate-200 rounded-3xl p-6 shadow-2xl relative">
                 
-                {/* Simulated App Node Interface Layout Mock with staggered lift animations */}
+                {/* Simulated App Node Interface Layout Mock */}
                 <div className="border border-slate-100 rounded-2xl bg-white shadow-md p-4 mb-4 flex items-center gap-3 transform transition-transform duration-500 hover:translate-y-[-4px] hover:shadow-lg cursor-pointer">
-                  <div className="p-2.5 bg-emerald-50 rounded-xl text-[#22C55E]"><Users size={20} /></div>
+                  <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${Colors.primary}15`, color: Colors.primary }}>
+                    <Users size={20} />
+                  </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase">Customer Profile</p>
-                    <p className="text-sm font-bold text-[#0A4429]">Hiring Vetted Professionals</p>
+                    <p className="text-sm font-bold text-slate-900">Hiring Vetted Professionals</p>
                   </div>
                 </div>
 
@@ -168,10 +178,18 @@ export default function Home() {
                 {/* Central Focus Mobile App Unit */}
                 <div className="mt-6 border-4 border-slate-900 rounded-2xl p-3 bg-slate-900 shadow-xl max-w-[200px] mx-auto text-center transform transition-all duration-500 hover:rotate-3 hover:scale-105">
                   <div className="bg-white rounded-xl py-4 px-2">
-                    <div className="w-6 h-6 bg-[#0A4429] text-white rounded-md mx-auto flex items-center justify-center font-bold text-xs mb-1 animate-bounce">U</div>
-                    <p className="text-[10px] font-black tracking-tight text-[#0A4429]">UNIT APP</p>
+                    <div 
+                      className="w-6 h-6 text-white rounded-md mx-auto flex items-center justify-center font-bold text-xs mb-1 animate-bounce"
+                      style={{ backgroundColor: Colors.primary }}
+                    >
+                      U
+                    </div>
+                    <p className="text-[10px] font-black tracking-tight" style={{ color: Colors.primary }}>UNIT APP</p>
                     <div className="w-full h-1.5 bg-slate-100 rounded-full my-2 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-[#22C55E]/40 w-1/2 rounded-full animate-[loading_1.5s_infinite]" />
+                      <div 
+                        className="absolute inset-0 w-1/2 rounded-full animate-[loading_1.5s_infinite]"
+                        style={{ backgroundColor: Colors.primary }}
+                      />
                     </div>
                     <div className="w-3/4 h-1.5 bg-slate-100 rounded-full mx-auto" />
                   </div>
@@ -188,10 +206,10 @@ export default function Home() {
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0A4429] tracking-tight">Explore Categories</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Explore Categories</h2>
             <p className="text-sm text-slate-500 mt-1">Get custom solutions from top specialized work networks.</p>
           </div>
-          <button className="text-sm font-bold text-[#0A4429] hover:text-[#22C55E] transition-all duration-300 flex items-center gap-1 group transform hover:translate-x-1">
+          <button className="text-sm font-bold flex items-center gap-1 group transform hover:translate-x-1 transition-all duration-300" style={{ color: Colors.primary }}>
             More Categories <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
           </button>
         </div>
@@ -200,12 +218,12 @@ export default function Home() {
           {categories.map((cat, idx) => (
             <div 
               key={idx} 
-              className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs hover:shadow-xl hover:border-emerald-200/50 transition-all duration-300 cursor-pointer flex flex-col items-center text-center group transform hover:translate-y-[-4px]"
+              className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col items-center text-center group transform hover:translate-y-[-4px]"
             >
-              <div className="p-3 bg-slate-50 group-hover:bg-[#22C55E]/10 transition-colors duration-300 rounded-xl mb-3">
+              <div className="p-3 bg-slate-50 transition-colors duration-300 rounded-xl mb-3">
                 {cat.icon}
               </div>
-              <span className="text-sm font-bold text-slate-800 tracking-tight group-hover:text-[#0A4429] transition-colors duration-200">{cat.name}</span>
+              <span className="text-sm font-bold text-slate-800 tracking-tight transition-colors duration-200">{cat.name}</span>
             </div>
           ))}
         </div>
@@ -214,7 +232,7 @@ export default function Home() {
       {/* 4. WHY CHOOSE UNIT? */}
       <section className="py-16 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl mb-12 space-y-2">
-          <h2 className="text-3xl font-black text-[#0A4429] tracking-tight">Why Choose Unit?</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Why Choose Unit?</h2>
           <p className="text-slate-500 text-sm">Building ecosystems anchored tightly around compliance, speed, and real metrics.</p>
         </div>
 
@@ -226,10 +244,13 @@ export default function Home() {
             { id: 4, title: "Fast Response", desc: "Receive responses from professionals nearby within minutes.", icon: <Zap size={24} className="transition-transform duration-300 group-hover:translate-y-[-2px]" /> }
           ].map(card => (
             <div key={card.id} className="bg-[#F8FAFC] border border-slate-100 rounded-2xl p-6 transition-all duration-300 hover:bg-white hover:shadow-lg hover:border-slate-200 group transform hover:translate-y-[-2px]">
-              <div className="w-12 h-12 bg-white group-hover:bg-[#22C55E]/10 rounded-xl flex items-center justify-center shadow-xs mb-4 text-[#22C55E] transition-colors duration-300">
+              <div 
+                className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-xs mb-4 transition-colors duration-300"
+                style={{ color: Colors.primary }}
+              >
                 {card.icon}
               </div>
-              <h3 className="text-lg font-bold text-[#0A4429] mb-2">{card.title}</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">{card.title}</h3>
               <p className="text-sm text-slate-600 leading-relaxed">{card.desc}</p>
             </div>
           ))}
@@ -239,7 +260,7 @@ export default function Home() {
       {/* 5. HOW IT WORKS TIMELINE */}
       <section id="how-it-works" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl font-black text-[#0A4429] tracking-tight">How It Works</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">How It Works</h2>
           <p className="text-slate-500 text-sm mt-1">A transparent, seamless horizontal process flow to fulfill workflows instantly.</p>
         </div>
 
@@ -251,13 +272,17 @@ export default function Home() {
             { step: "Step 4", name: "Get the job done", desc: "Fulfill project scopes safely with milestone transparency." }
           ].map((item, index) => (
             <div key={index} className="relative bg-white border border-slate-100 p-6 rounded-2xl shadow-xs transition-all duration-300 hover:shadow-md group">
-              <span className="text-xs font-extrabold text-[#22C55E] bg-[#22C55E]/10 group-hover:bg-[#22C55E] group-hover:text-white px-2.5 py-1 rounded-md uppercase tracking-wider transition-colors duration-300">{item.step}</span>
-              <h4 className="text-base font-bold text-[#0A4429] mt-3 mb-1">{item.name}</h4>
+              <span 
+                className="text-xs font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider transition-colors duration-300"
+                style={{ backgroundColor: `${Colors.primary}15`, color: Colors.primary }}
+              >
+                {item.step}
+              </span>
+              <h4 className="text-base font-bold text-slate-900 mt-3 mb-1">{item.name}</h4>
               <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
               
-              {/* Connection Indicator Arrow (Hidden on final node) */}
               {index < 3 && (
-                <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10 text-slate-300 group-hover:text-[#22C55E] group-hover:translate-x-1 transition-all duration-300">
+                <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10 text-slate-300 group-hover:translate-x-1 transition-all duration-300">
                   <ChevronRight size={20} />
                 </div>
               )}
@@ -270,7 +295,7 @@ export default function Home() {
       <section id="professionals" className="py-16 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10">
-            <h2 className="text-3xl font-black text-[#0A4429] tracking-tight">Featured Professionals</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Featured Professionals</h2>
             <p className="text-sm text-slate-500 mt-1">Independently verified individual specialists with exceptional response parameters.</p>
           </div>
 
@@ -283,12 +308,15 @@ export default function Home() {
               <div key={idx} className="border border-slate-100 rounded-2xl p-5 bg-[#F8FAFC] hover:bg-white flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:border-slate-200 group transform hover:translate-y-[-4px]">
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-slate-200 group-hover:bg-[#0A4429] group-hover:text-white transition-colors duration-300 rounded-xl flex items-center justify-center font-bold text-[#0A4429] text-lg">
+                    <div 
+                      className="w-12 h-12 bg-slate-200 transition-colors duration-300 rounded-xl flex items-center justify-center font-bold text-lg"
+                      style={{ color: Colors.primary }}
+                    >
                       {pro.name.charAt(0)}
                     </div>
                     <div>
                       <h4 className="font-bold text-slate-900 text-base">{pro.name}</h4>
-                      <p className="text-xs font-semibold text-[#22C55E]">{pro.role}</p>
+                      <p className="text-xs font-semibold" style={{ color: Colors.primary }}>{pro.role}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-slate-500 py-2 border-y border-slate-200/60 my-3">
@@ -299,7 +327,10 @@ export default function Home() {
                     <span>{pro.location}</span>
                   </div>
                 </div>
-                <button className="w-full mt-2 py-2.5 bg-white border border-slate-200 hover:border-[#0A4429] text-[#0A4429] font-bold text-xs rounded-xl transition-all duration-200 hover:shadow-xs active:scale-98 transform">
+                <button 
+                  className="w-full mt-2 py-2.5 bg-white border border-slate-200 font-bold text-xs rounded-xl transition-all duration-200 hover:shadow-xs active:scale-98 transform"
+                  style={{ color: Colors.primary }}
+                >
                   View Profile
                 </button>
               </div>
@@ -311,7 +342,7 @@ export default function Home() {
       {/* 7. FEATURED COMPANIES */}
       <section id="companies" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10">
-          <h2 className="text-3xl font-black text-[#0A4429] tracking-tight">Featured Companies</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Featured Companies</h2>
           <p className="text-sm text-slate-500 mt-1">Top-tier corporate firms and service agencies with full compliance credentials.</p>
         </div>
 
@@ -324,7 +355,7 @@ export default function Home() {
               <div>
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h3 className="text-lg font-black text-[#0A4429] group-hover:text-[#22C55E] transition-colors duration-200">{comp.name}</h3>
+                    <h3 className="text-lg font-black transition-colors duration-200" style={{ color: Colors.primary }}>{comp.name}</h3>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">{comp.type}</p>
                   </div>
                   <span className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md">
@@ -334,7 +365,10 @@ export default function Home() {
                 <p className="text-sm text-slate-600 leading-relaxed mb-4">{comp.desc}</p>
                 <p className="text-xs text-slate-400 font-semibold mb-4">Completed {comp.projects} Projects Successfully</p>
               </div>
-              <button className="w-full py-3 bg-[#0A4429] hover:bg-[#062c1a] text-white font-bold text-xs rounded-xl transition-all duration-300 shadow-sm transform active:scale-98">
+              <button 
+                className="w-full py-3 text-white font-bold text-xs rounded-xl transition-all duration-300 shadow-sm transform active:scale-98"
+                style={{ backgroundColor: Colors.primary }}
+              >
                 View Company
               </button>
             </div>
@@ -345,7 +379,7 @@ export default function Home() {
       {/* 8. TESTIMONIALS */}
       <section className="py-16 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-2xl">
-          <h2 className="text-3xl font-black text-[#0A4429] tracking-tight mb-8">What Our Customers Say</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-8">What Our Customers Say</h2>
           <div className="bg-[#F8FAFC] border border-slate-100 p-8 rounded-3xl relative transition-transform duration-500 hover:scale-[1.01] hover:shadow-md">
             <div className="flex justify-center gap-1 mb-4 text-amber-400">
               {[...Array(5)].map((_, i) => <Star key={i} size={18} className="fill-current animate-[spin_4s_linear_infinite]" style={{animationDelay: `${i * 150}ms`}} />)}
@@ -353,7 +387,7 @@ export default function Home() {
             <blockquote className="text-lg font-medium text-slate-800 leading-relaxed italic">
               "Unit helped me find a plumber in less than 20 minutes. The service layout was clean, payment parameters transparent, and the expert completely competent."
             </blockquote>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#22C55E] mt-4">— Verified Client, Kilimani</p>
+            <p className="text-xs font-bold uppercase tracking-widest mt-4" style={{ color: Colors.primary }}>— Verified Client, Kilimani</p>
           </div>
         </div>
       </section>
@@ -368,27 +402,29 @@ export default function Home() {
             { metric: "18,000+", label: "Completed Jobs", icon: <CheckCircle size={18} /> }
           ].map((stat, i) => (
             <div key={i} className="bg-white border border-slate-100 p-6 rounded-2xl shadow-xs transition-transform duration-300 hover:scale-105 group cursor-pointer">
-              <div className="w-8 h-8 mx-auto bg-slate-50 text-slate-400 rounded-lg flex items-center justify-center mb-2 group-hover:bg-[#0A4429] group-hover:text-white transition-colors duration-300">
+              <div className="w-8 h-8 mx-auto bg-slate-50 text-slate-400 rounded-lg flex items-center justify-center mb-2 transition-colors duration-300">
                 {stat.icon}
               </div>
-              <h3 className="text-3xl sm:text-4xl font-black text-[#0A4429] tracking-tight group-hover:text-[#22C55E] transition-colors duration-300">{stat.metric}</h3>
+              <h3 className="text-3xl sm:text-4xl font-black tracking-tight transition-colors duration-300" style={{ color: Colors.primary }}>{stat.metric}</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 10. CALL TO ACTION (DARK GREEN CONTAINER) */}
+      {/* 10. CALL TO ACTION CONTAINER */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="bg-[#0A4429] rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl shadow-emerald-950/20 group">
-          <div className="absolute inset-0 bg-radial from-[#22C55E]/20 to-transparent pointer-events-none opacity-60 transition-transform duration-700 group-hover:scale-110" />
+        <div 
+          className="rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl group"
+          style={{ backgroundColor: Colors.primary }}
+        >
           <div className="relative z-10 max-w-2xl mx-auto space-y-4">
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight transition-transform duration-300 group-hover:scale-[1.02]">Ready to Find the Right Professional?</h2>
-            <p className="text-sm sm:text-base text-emerald-100/80 leading-relaxed max-w-lg mx-auto">
+            <p className="text-sm sm:text-base text-white/90 leading-relaxed max-w-lg mx-auto">
               Join thousands of customers using Unit every day to handle corporate contracting and local property maintenance safely.
             </p>
             <div className="pt-4">
-              <button className="bg-[#22C55E] hover:bg-[#1ca84f] text-white font-extrabold text-sm px-8 py-4 rounded-xl shadow-lg shadow-emerald-900/40 transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-xl">
+              <button className="bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-sm px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95">
                 Get Started Now
               </button>
             </div>
@@ -397,10 +433,9 @@ export default function Home() {
       </section>
 
       {/* 11. FOOTER ARCHITECTURE */}
-      <HomeFooter/>
-      
+      <HomeFooter />
 
-      {/* Injection of explicit, lightweight animation timelines for the UI wrapper elements */}
+      {/* Keyframe Styles */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes loading {
           0% { transform: translateX(-100%); }

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../../layouts/Layout";
 import api from "../../api/api";
+import Colors from "../../constants/colors";
 import {
   Building2,
   Wallet,
@@ -8,9 +10,13 @@ import {
   ArrowUpRight,
   Calendar,
   FileBarChart2,
+  Clock,
+  ArrowRight,
+  Home,
 } from "lucide-react";
 
 export default function LandlordDashboard() {
+  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +29,7 @@ export default function LandlordDashboard() {
       const response = await api.get("/landlords/landlord_dashboard/");
       setDashboard(response.data);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching landlord dashboard:", error);
     } finally {
       setLoading(false);
     }
@@ -39,225 +45,253 @@ export default function LandlordDashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-[80vh]">
-          <div className="h-10 w-10 border-4 border-[#2E9D47] border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex justify-center items-center min-h-[70vh]">
+          <div
+            className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
+            style={{
+              borderColor: `${Colors.primary || "#0A4429"} transparent transparent transparent`,
+            }}
+          />
         </div>
       </Layout>
     );
   }
 
-  return (
-    <Layout>
-      <div className="min-h-screen bg-[#F4F1E6]/30 p-6">
+  // Fallback defaults in case backend parameters are missing
+  const summary = dashboard?.summary || {
+    properties: 0,
+    units: 0,
+    occupied_units: 0,
+    available_units: 0,
+    rent_collected: 0,
+    pending_rent: 0,
+    occupancy_rate: 0,
+  };
 
-        {/* ================= HEADER ================= */}
-
-        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 mb-8">
-
-          <div>
-
-            <span className="text-xs uppercase tracking-widest text-[#2E9D47] font-bold">
-              Landlord Dashboard
-            </span>
-
-            <h1 className="text-4xl font-bold text-[#0A4429] mt-2">
-              Welcome Back 👋
-            </h1>
-
-            <p className="text-gray-500 mt-2 max-w-2xl">
-              Monitor your rental income, occupancy levels,
-              tenant payments and overall portfolio performance
-              from one centralized dashboard.
-            </p>
-
-            <div className="flex items-center gap-2 text-sm text-gray-400 mt-4">
-              <Calendar size={16} />
-              {today}
-            </div>
-
-          </div>
-
-          {/* Quick Actions */}
-
-          <div className="flex flex-wrap gap-3">
-
-            <button className="flex items-center gap-2 bg-[#2E9D47] hover:bg-[#0A4429] text-white px-5 py-3 rounded-xl transition">
-              <Building2 size={18} />
-              My Properties
-            </button>
-
-            <button className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3 rounded-xl transition">
-              <Users size={18} />
-              My Tenants
-            </button>
-
-            <button className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3 rounded-xl transition">
-              <FileBarChart2 size={18} />
-              Reports
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* ================= PORTFOLIO BANNER ================= */}
-
-        <div className="bg-gradient-to-r from-[#0A4429] to-[#2E9D47] rounded-3xl p-8 text-white shadow-lg mb-10">
-
-          <div className="flex flex-col lg:flex-row justify-between gap-8">
-
-            <div>
-
-              <p className="uppercase tracking-widest text-green-200 text-xs">
-                Portfolio Overview
-              </p>
-
-              <h2 className="text-3xl font-bold mt-3">
-                Your Investment Portfolio
-              </h2>
-
-              <p className="text-green-100 mt-3 max-w-xl">
-                Keep track of your rental properties,
-                occupancy performance and monthly income
-                through UNIT's intelligent property
-                management platform.
-              </p>
-
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-
-              <div className="bg-white/10 backdrop-blur rounded-2xl p-5">
-
-                <Wallet size={28} />
-
-                <p className="mt-4 text-green-100 text-sm">
-                  Monthly Revenue
-                </p>
-
-                <h3 className="text-3xl font-bold mt-2">
-                  Ksh {dashboard.summary.rent_collected.toLocaleString()}
-                </h3>
-
-              </div>
-
-              <div className="bg-white/10 backdrop-blur rounded-2xl p-5">
-
-                <ArrowUpRight size={28} />
-
-                <p className="mt-4 text-green-100 text-sm">
-                  Occupancy Rate
-                </p>
-
-                <h3 className="text-3xl font-bold mt-2">
-                  {dashboard.summary.occupancy_rate}%
-                </h3>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* ================= SUMMARY CARDS ================= */}
-
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-10">
-
-  {[
+  const cards = [
     {
       title: "My Properties",
-      value: dashboard.summary.properties,
+      value: summary.properties,
       subtitle: "Registered Buildings",
       icon: Building2,
       color: "bg-blue-50 text-blue-600",
+      path: "/properties",
     },
     {
       title: "Total Units",
-      value: dashboard.summary.units,
+      value: summary.units,
       subtitle: "Rental Units",
-      icon: Building2,
-      color: "bg-green-50 text-green-600",
+      icon: Home,
+      color: "bg-emerald-50 text-emerald-600",
+      path: "/properties",
     },
     {
       title: "Occupied Units",
-      value: dashboard.summary.occupied_units,
+      value: summary.occupied_units,
       subtitle: "Currently Occupied",
       icon: Users,
-      color: "bg-emerald-50 text-emerald-600",
+      color: "bg-green-50 text-green-700",
+      path: "/tenants",
     },
     {
       title: "Available Units",
-      value: dashboard.summary.available_units,
+      value: summary.available_units,
       subtitle: "Ready for Leasing",
       icon: Building2,
-      color: "bg-yellow-50 text-yellow-600",
+      color: "bg-amber-50 text-amber-600",
+      path: "/properties",
     },
     {
       title: "Rent Collected",
-      value: `Ksh ${dashboard.summary.rent_collected.toLocaleString()}`,
+      value: `Ksh ${Number(summary.rent_collected || 0).toLocaleString()}`,
       subtitle: "This Month",
       icon: Wallet,
-      color: "bg-green-100 text-[#2E9D47]",
+      color: "bg-emerald-100/70 text-emerald-800",
+      path: "/reports",
     },
     {
       title: "Pending Rent",
-      value: `Ksh ${dashboard.summary.pending_rent.toLocaleString()}`,
+      value: `Ksh ${Number(summary.pending_rent || 0).toLocaleString()}`,
       subtitle: "Awaiting Payment",
-      icon: Wallet,
-      color: "bg-red-50 text-red-600",
+      icon: Clock,
+      color: "bg-rose-50 text-rose-600",
+      path: "/reports",
     },
-  ].map((card, index) => (
-    <div
-      key={index}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300"
-    >
-      <div className="flex justify-between items-start">
+  ];
 
-        <div>
+  return (
+    <Layout>
+      <div
+        className="min-h-screen p-4 md:p-8 font-sans"
+        style={{ backgroundColor: Colors.background || "#F8FAFC" }}
+      >
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+              <span
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: Colors.secondary || "#2E9D47" }}
+              >
+                Landlord Dashboard
+              </span>
 
-          <p className="text-gray-500 text-sm">
-            {card.title}
-          </p>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-1 tracking-tight">
+                Welcome Back 👋
+              </h1>
 
-          <h2 className="text-3xl font-bold text-[#0A4429] mt-3">
-            {card.value}
-          </h2>
+              <p className="text-gray-500 text-sm mt-2 max-w-2xl leading-relaxed">
+                Monitor your rental income, occupancy levels, tenant payments, and
+                overall portfolio performance from one centralized dashboard.
+              </p>
 
-          <p className="text-xs text-gray-400 mt-3">
-            {card.subtitle}
-          </p>
+              <div className="flex items-center gap-2 text-xs font-medium text-gray-400 mt-4">
+                <Calendar size={15} />
+                <span>{today}</span>
+              </div>
+            </div>
 
+            {/* Quick Actions */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => navigate("/properties")}
+                className="flex items-center gap-2 text-white px-5 py-3 rounded-2xl text-sm font-bold shadow-2xs hover:opacity-90 transition"
+                style={{ backgroundColor: Colors.primary || "#0A4429" }}
+              >
+                <Building2 size={18} />
+                My Properties
+              </button>
+
+              <button
+                onClick={() => navigate("/tenants")}
+                className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-slate-700 px-5 py-3 rounded-2xl text-sm font-bold shadow-2xs transition"
+              >
+                <Users size={18} />
+                My Tenants
+              </button>
+
+              <button
+                onClick={() => navigate("/reports")}
+                className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-slate-700 px-5 py-3 rounded-2xl text-sm font-bold shadow-2xs transition"
+              >
+                <FileBarChart2 size={18} />
+                Reports
+              </button>
+            </div>
+          </div>
+
+          {/* Portfolio Banner */}
+          <div
+            className="rounded-3xl p-6 md:p-10 text-white shadow-md relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${
+                Colors.primary || "#0A4429"
+              } 0%, ${Colors.secondary || "#2E9D47"} 100%)`,
+            }}
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+              <div>
+                <span className="uppercase tracking-widest text-emerald-200 text-xs font-bold">
+                  Portfolio Overview
+                </span>
+
+                <h2 className="text-2xl md:text-3xl font-bold mt-2">
+                  Your Investment Portfolio
+                </h2>
+
+                <p className="text-emerald-100/90 text-sm mt-2 max-w-xl leading-relaxed">
+                  Keep track of your rental properties, occupancy performance, and
+                  monthly income through the intelligent property management platform.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
+                    <Wallet size={22} />
+                  </div>
+                  <p className="mt-4 text-emerald-100 text-xs font-medium">
+                    Monthly Revenue
+                  </p>
+                  <h3 className="text-2xl md:text-3xl font-bold mt-1">
+                    Ksh {Number(summary.rent_collected || 0).toLocaleString()}
+                  </h3>
+                </div>
+
+                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
+                    <ArrowUpRight size={22} />
+                  </div>
+                  <p className="mt-4 text-emerald-100 text-xs font-medium">
+                    Occupancy Rate
+                  </p>
+                  <h3 className="text-2xl md:text-3xl font-bold mt-1">
+                    {summary.occupancy_rate}%
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card, index) => (
+              <div
+                key={index}
+                onClick={() => card.path && navigate(card.path)}
+                className="bg-white rounded-3xl p-6 shadow-2xs border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-gray-500 text-xs font-medium">
+                        {card.title}
+                      </p>
+                      <h2
+                        className="text-2xl md:text-3xl font-extrabold mt-2 tracking-tight"
+                        style={{ color: Colors.primary || "#0A4429" }}
+                      >
+                        {card.value}
+                      </h2>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {card.subtitle}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xs ${card.color}`}
+                    >
+                      <card.icon size={24} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="text-gray-400">Progress</span>
+                    <ArrowRight
+                      size={14}
+                      className="text-gray-400 group-hover:translate-x-1 transition-transform"
+                      style={{ color: Colors.secondary }}
+                    />
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        backgroundColor: Colors.secondary || "#2E9D47",
+                        width:
+                          card.title === "Occupied Units"
+                            ? `${summary.occupancy_rate}%`
+                            : "100%",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-
-        <div
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center ${card.color}`}
-        >
-          <card.icon size={28} />
-        </div>
-
-      </div>
-
-      <div className="mt-6 h-2 bg-gray-100 rounded-full overflow-hidden">
-
-        <div
-          className="h-full bg-[#2E9D47]"
-          style={{
-            width:
-              card.title === "Occupied Units"
-                ? `${dashboard.summary.occupancy_rate}%`
-                : "100%",
-          }}
-        />
-
-      </div>
-
-    </div>
-  ))}
-
-</div>
-
       </div>
     </Layout>
   );

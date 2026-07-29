@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Activity } from "lucide-react";
 import { bootstrapAuth } from "../utils/bootstrapAuth";
+import Colors from "../constants/colors";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -14,18 +15,21 @@ export default function Index() {
 
         if (loggedIn) {
           const storedUser = localStorage.getItem("user");
-         const user = storedUser ? JSON.parse(storedUser) : null;
+          const user = storedUser ? JSON.parse(storedUser) : null;
           console.log("Session found");
-          if(data.user.role === "property_manager"){
-        navigate("/property-manager-dashboard");
-      }else if(data.user.role === "company admin"){
-        navigate("/company-dashboard");
-      }else if(data.user.role === "landlord"){
-        navigate("/landlord-dashboard");
-      }
-      else{
-        navigate("/dashboard");
-      }
+
+          // Safely check role using the parsed 'user' object
+          const role = user?.role;
+
+          if (role === "property_manager") {
+            navigate("/property-manager-dashboard");
+          } else if (role === "company admin") {
+            navigate("/company-dashboard");
+          } else if (role === "landlord") {
+            navigate("/landlord-dashboard");
+          } else {
+            navigate("/dashboard");
+          }
         } else {
           console.log("No session found");
           navigate("/signin", {
@@ -45,43 +49,45 @@ export default function Index() {
   if (checkingAuth) {
     return (
       <div 
-        className="h-screen flex items-center justify-center bg-gradient-to-br from-[#0A4429] to-[#052214]"
+        className="h-screen flex items-center justify-center"
+        style={{ backgroundColor: Colors.background }}
       >
         <div className="text-center">
           <div
             className="
-            w-24
-            h-24
-            bg-white/95
-            rounded-3xl
-            flex
-            items-center
-            justify-center
-            shadow-xl
-            shadow-black/20
-            mx-auto
+              w-24
+              h-24
+              bg-white/95
+              rounded-3xl
+              flex
+              items-center
+              justify-center
+              shadow-xl
+              shadow-black/20
+              mx-auto
             "
           >
-            {/* Updated icon color to Primary Logo Green */}
-            <Activity size={45} className="text-[#2E9D47]" />
+            <Activity size={45} color={Colors.primary} />
           </div>
 
           <div className="mt-6">
-            {/* Updated loading spinner border to Primary Logo Green */}
             <div
               className="
-              h-8
-              w-8
-              border-4
-              border-[#2E9D47]
-              border-t-transparent
-              rounded-full
-              animate-spin
-              mx-auto
+                h-8
+                w-8
+                border-4
+                border-t-transparent
+                rounded-full
+                animate-spin
+                mx-auto
               "
+              style={{ borderColor: Colors.primary, borderTopColor: "transparent" }}
             ></div>
 
-            <p className="text-[#F4F1E6] mt-4 text-base font-medium tracking-wide">
+            <p 
+              className="mt-4 text-base font-medium tracking-wide"
+              style={{ color: Colors.primary }}
+            >
               Checking UNIT session...
             </p>
           </div>

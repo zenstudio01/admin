@@ -1,3 +1,4 @@
+import React from "react";
 import {
   FaHome,
   FaBuilding,
@@ -19,7 +20,7 @@ import {
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
-
+import Colors from "../constants/colors";
 
 export default function Sidebar() {
   const storedUser = localStorage.getItem("user");
@@ -195,7 +196,7 @@ export default function Sidebar() {
       name: "Subscription Packages",
       path: "/subscription-packages",
       icon: <Package />,
-      roles: ["store owner","admin", "company admin", "property manager"],
+      roles: ["store owner", "admin", "company admin", "property manager"],
     },
   ];
 
@@ -222,9 +223,17 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "bg-green-100 text-[#0A4429] font-semibold"
+                      ? "font-semibold shadow-2xs"
                       : "text-gray-700 hover:bg-gray-100"
                   }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                        backgroundColor: `${Colors.primary}15`,
+                        color: Colors.primary,
+                      }
+                    : {}
                 }
               >
                 {item.icon}
@@ -235,13 +244,13 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition font-medium"
         >
           <LogOut size={20} />
-          Logout
+          <span>Logout</span>
         </button>
       </div>
     </aside>
